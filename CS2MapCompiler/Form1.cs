@@ -73,6 +73,8 @@ namespace CS2MapCompiler
             lightmapquality.SelectedIndex = 1;
             cs2dir = GetCS2Dir();
             CS2Validator();
+            gamedir.Text = cs2dir;
+
 
             int cpuCount = Environment.ProcessorCount;
             for (int i = 1; i <= cpuCount; i++)
@@ -85,33 +87,67 @@ namespace CS2MapCompiler
         }
         void CS2Validator()
         {
-            if (File.Exists(Path.Combine(cs2dir ,"cs2.exe")))
+            string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "steamtours.exe", "dota2.exe", "deskjob.exe" };
+            bool anyExecutableFound = false;
+
+            foreach (string exe in requiredExecutables)
             {
-                cs2status.Text = "Found";
-                cs2status.ForeColor = Color.Green;
-                button1.Enabled = true;
-                if (File.Exists(Path.Combine(cs2dir ,"resourcecompiler.exe")))
+                if (File.Exists(Path.Combine(cs2dir,exe)))
                 {
-                    wststatus.Text = "Found";
-                    wststatus.ForeColor = Color.Green;
-                    resourcecompiler = Path.Combine(cs2dir, "resourcecompiler.exe");
+                    anyExecutableFound = true;
+                    cs2status.Text = $"Found {exe}";
+                    cs2status.ForeColor = Color.Green;
                     button1.Enabled = true;
-                }
-                else
-                {
-                    wststatus.Text = "Not Found";
-                    wststatus.ForeColor = Color.DarkRed;
-                    MessageBox.Show("Please Install Workshop Tools!", "CS2 Map Compiler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    button1.Enabled = false;
+                    if (exe != "cs2.exe" && exe != "project8.exe" && exe != "dota2.exe")
+                    {
+                        cpu.Enabled = false;
+                        cpu.Visible = false;
+                        cpuLabel.Text = "GPU lightmap not supported! CPU will be used by default.";
+                    }
+
+                    if (exe !="dota2.exe")
+                    {
+                        gridNav.Enabled = false;
+                        gridNav.Visible = false;
+                    } else
+                    if (exe == "dota2.exe")
+                    {
+                        gridNav.Enabled = true;
+                        gridNav.Visible = true;
+                        genLightmaps.Checked = false;
+                        noiseremoval.Checked = false;
+                        buildNav.Checked = false;
+                        saReverb.Checked = false;
+                        baPaths.Checked = false;
+                        bakeCustom.Checked = false;
+                    }
+
+                    if (File.Exists(Path.Combine(cs2dir, "resourcecompiler.exe")))
+                    {
+                        wststatus.Text = "Found";
+                        wststatus.ForeColor = Color.Green;
+                        resourcecompiler = Path.Combine(cs2dir, "resourcecompiler.exe");
+                        button1.Enabled = true;
+                    }
+                    else
+                    {
+                        wststatus.Text = "Not Found";
+                        wststatus.ForeColor = Color.DarkRed;
+                        MessageBox.Show("Please Install Workshop Tools!", "CS2 Map Compiler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        button1.Enabled = false;
+                    }
+
+                    break; // Exit the loop once any executable is found
                 }
             }
-            else
+
+            if (!anyExecutableFound)
             {
                 cs2status.Text = "Not Found";
                 cs2status.ForeColor = Color.DarkRed;
                 wststatus.Text = "Not Found";
                 wststatus.ForeColor = Color.DarkRed;
-                MessageBox.Show("CS2 Installation Not Found! Please install the game or set the path manually in the options! ", "CS2 Map Compiler", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("CS2 Installation Not Found! Please install the game or set the path manually in the options!", "CS2 Map Compiler", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 button1.Enabled = false;
             }
         }
@@ -125,6 +161,7 @@ namespace CS2MapCompiler
         {
 
         }
+            
         string ArgumentBuilder()
         {
             List<string> args = new List<string>();
@@ -137,6 +174,11 @@ namespace CS2MapCompiler
             else if (entsOnly.Checked)
             {             
                 args.Add("-entities");
+                args.Remove("-lightmapMaxResolution " + lightmapres.Text);
+                args.Remove("-lightmapVRadQuality " + lightmapquality.SelectedIndex.ToString());
+                args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                args.Remove($"-sacustomdata_threads {AudioThreadsBox.SelectedItem}");
             }
             if (!settlephys.Checked)
             {
@@ -186,14 +228,14 @@ namespace CS2MapCompiler
             if (buildVis.Checked)
             {
                 args.Add("-vis");
-            }
-            if (buildNav.Checked)
-            {
-                args.Add("-nav");
-            }
+            }            
             if (navDbg.Checked)
             {
                 args.Add("-navdbg");
+            }
+            if (gridNav.Checked)
+            {
+                args.Add("-gridnav");
             }
             if (saReverb.Checked)
             {
@@ -204,6 +246,11 @@ namespace CS2MapCompiler
             {
                 args.Add("-sapaths");
                 args.Add($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+            }
+            if (bakeCustom.Checked)
+            {
+                args.Add("-sacustomdata");
+                args.Add($"-sacustomdata_threads {AudioThreadsBox.SelectedItem}");
             }
             if (vconPrint.Checked)
             {
@@ -295,11 +342,12 @@ namespace CS2MapCompiler
         private void button3_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
-            file.Filter = "cs2.exe |*.exe";
-            if(file.ShowDialog() == DialogResult.OK)
+            file.Filter = "Executable Files (*.exe)|cs2.exe;hlvr.exe;project8.exe;steamtours.exe;deskjob.exe;dota2.exe";
+            if (file.ShowDialog() == DialogResult.OK)
             {
                 cs2dir = Path.GetDirectoryName(file.FileName);
                 CS2Validator();
+                gamedir.Text = cs2dir;
             }
         }
 
@@ -333,8 +381,28 @@ namespace CS2MapCompiler
         private void button4_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
-            file.InitialDirectory = Directory.GetParent(cs2dir).Parent.Parent.FullName + "\\content\\csgo_addons\\";
+
+            string[] addonDirectories = {
+        "csgo_addons",
+        "hlvr_addons",
+        "citadel_addons",
+        "dota_addons",
+        "testbed_addons",
+        "steamtours_addons"
+        };
+
+            foreach (string addonDir in addonDirectories)
+            {
+                string path = Path.Combine(Directory.GetParent(cs2dir).Parent.Parent.FullName, "content", addonDir);
+                if (Directory.Exists(path))
+                {
+                    file.InitialDirectory = path;
+                    break;
+                }
+            }
+
             file.Filter = "Hammer Map File |*.vmap";
+
             if (file.ShowDialog() == DialogResult.OK)
             {
                 mappath = file.FileName;
@@ -343,7 +411,6 @@ namespace CS2MapCompiler
                 outputpath = Directory.GetParent(cs2dir).Parent.FullName;
                 outputdir.Text = outputpath;
                 button5.Enabled = true;
-                
             }
         }
 
@@ -351,12 +418,31 @@ namespace CS2MapCompiler
         {
             string dummyFileName = "Select Here";
             SaveFileDialog file = new SaveFileDialog();
-            file.InitialDirectory = Directory.GetParent(cs2dir).Parent.FullName + "\\csgo_addons\\" + addonname + "\\maps\\";
+
+        string[] addonDirectories = {
+        "csgo_addons",
+        "hlvr_addons",
+        "citadel_addons",
+        "dota_addons",
+        "testbed_addons",
+        "steamtours_addons"
+        };
+
+            foreach (string addonDir in addonDirectories)
+            {
+                string path = Path.Combine(Directory.GetParent(cs2dir).Parent.FullName, addonDir, addonname, "maps");
+                if (Directory.Exists(path))
+                {
+                    file.InitialDirectory = path;
+                    break;
+                }
+            }
+
             file.FileName = dummyFileName;
             file.Filter = "Directory | directory";
+
             if (file.ShowDialog() == DialogResult.OK)
             {
-                
                 outputpath = Path.GetDirectoryName(file.FileName);
                 outputdir.Text = outputpath;
             }
@@ -397,6 +483,7 @@ namespace CS2MapCompiler
                 navDbg.Enabled = true;
                 saReverb.Enabled = true;
                 baPaths.Enabled = true;
+                bakeCustom.Enabled = true;
             }
             else
             {
@@ -415,6 +502,22 @@ namespace CS2MapCompiler
                 navDbg.Enabled = false;
                 saReverb.Enabled = false;
                 baPaths.Enabled = false;
+                bakeCustom.Enabled = false;
+
+                genLightmaps.Checked = false;
+                cpu.Checked = false;
+                noiseremoval.Checked = false;
+                compression.Checked = false;
+                useDeterCharts.Checked = false;
+                noLightCalc.Checked = false;
+                writeDebugPT.Checked = false;
+                buildPhys.Checked = false;
+                buildVis.Checked = false;
+                buildNav.Checked = false;
+                navDbg.Checked = false;
+                saReverb.Checked = false;
+                baPaths.Checked = false;
+                bakeCustom.Checked = false;
             }
         }
     }

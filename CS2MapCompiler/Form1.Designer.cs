@@ -51,7 +51,7 @@ namespace CS2MapCompiler
             this.buildVis = new System.Windows.Forms.CheckBox();
             this.buildNav = new System.Windows.Forms.CheckBox();
             this.cpu = new System.Windows.Forms.CheckBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.cpuLabel = new System.Windows.Forms.Label();
             this.button4 = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.outputdir = new System.Windows.Forms.Label();
@@ -78,6 +78,10 @@ namespace CS2MapCompiler
             this.vconPrint = new System.Windows.Forms.CheckBox();
             this.vprofPrint = new System.Windows.Forms.CheckBox();
             this.logPrint = new System.Windows.Forms.CheckBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.gamedir = new System.Windows.Forms.Label();
+            this.bakeCustom = new System.Windows.Forms.CheckBox();
+            this.gridNav = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // timer1
@@ -110,9 +114,9 @@ namespace CS2MapCompiler
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(109, 17);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(27, 13);
+            this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 3;
-            this.label1.Text = "CS2";
+            this.label1.Text = "Game";
             // 
             // cs2status
             // 
@@ -127,17 +131,17 @@ namespace CS2MapCompiler
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(216, 17);
+            this.label2.Location = new System.Drawing.Point(282, 17);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(85, 13);
+            this.label2.Size = new System.Drawing.Size(33, 13);
             this.label2.TabIndex = 5;
-            this.label2.Text = "Workshop Tools";
+            this.label2.Text = "Tools";
             // 
             // wststatus
             // 
             this.wststatus.AutoSize = true;
             this.wststatus.ForeColor = System.Drawing.Color.DarkRed;
-            this.wststatus.Location = new System.Drawing.Point(307, 17);
+            this.wststatus.Location = new System.Drawing.Point(317, 17);
             this.wststatus.Name = "wststatus";
             this.wststatus.Size = new System.Drawing.Size(57, 13);
             this.wststatus.TabIndex = 6;
@@ -304,20 +308,20 @@ namespace CS2MapCompiler
             this.cpu.Text = "Use CPU";
             this.cpu.UseVisualStyleBackColor = true;
             // 
-            // label5
+            // cpuLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
-            this.label5.ForeColor = System.Drawing.Color.DimGray;
-            this.label5.Location = new System.Drawing.Point(130, 172);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(298, 13);
-            this.label5.TabIndex = 21;
-            this.label5.Text = "Use if you don\'t have a RT-capable GPU. Disables emissives!";
+            this.cpuLabel.AutoSize = true;
+            this.cpuLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.cpuLabel.ForeColor = System.Drawing.Color.DimGray;
+            this.cpuLabel.Location = new System.Drawing.Point(130, 172);
+            this.cpuLabel.Name = "cpuLabel";
+            this.cpuLabel.Size = new System.Drawing.Size(278, 13);
+            this.cpuLabel.TabIndex = 21;
+            this.cpuLabel.Text = "Use if you don\'t have a RT-capable GPU. Broken in CS2!";
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(385, 537);
+            this.button4.Location = new System.Drawing.Point(385, 514);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 21);
             this.button4.TabIndex = 22;
@@ -328,7 +332,7 @@ namespace CS2MapCompiler
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 570);
+            this.label6.Location = new System.Drawing.Point(7, 545);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(42, 13);
             this.label6.TabIndex = 23;
@@ -338,7 +342,7 @@ namespace CS2MapCompiler
             // outputdir
             // 
             this.outputdir.AutoSize = true;
-            this.outputdir.Location = new System.Drawing.Point(57, 570);
+            this.outputdir.Location = new System.Drawing.Point(52, 545);
             this.outputdir.MaximumSize = new System.Drawing.Size(450, 0);
             this.outputdir.Name = "outputdir";
             this.outputdir.Size = new System.Drawing.Size(27, 13);
@@ -349,7 +353,7 @@ namespace CS2MapCompiler
             // button5
             // 
             this.button5.Enabled = false;
-            this.button5.Location = new System.Drawing.Point(288, 537);
+            this.button5.Location = new System.Drawing.Point(288, 514);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(91, 21);
             this.button5.TabIndex = 25;
@@ -504,7 +508,7 @@ namespace CS2MapCompiler
             // AudioThreadsBox
             // 
             this.AudioThreadsBox.FormattingEnabled = true;
-            this.AudioThreadsBox.Location = new System.Drawing.Point(267, 398);
+            this.AudioThreadsBox.Location = new System.Drawing.Point(385, 398);
             this.AudioThreadsBox.Name = "AudioThreadsBox";
             this.AudioThreadsBox.Size = new System.Drawing.Size(41, 21);
             this.AudioThreadsBox.TabIndex = 42;
@@ -512,7 +516,7 @@ namespace CS2MapCompiler
             // AudioThreadsLabel
             // 
             this.AudioThreadsLabel.AutoSize = true;
-            this.AudioThreadsLabel.Location = new System.Drawing.Point(182, 401);
+            this.AudioThreadsLabel.Location = new System.Drawing.Point(300, 401);
             this.AudioThreadsLabel.Name = "AudioThreadsLabel";
             this.AudioThreadsLabel.Size = new System.Drawing.Size(79, 13);
             this.AudioThreadsLabel.TabIndex = 41;
@@ -583,11 +587,57 @@ namespace CS2MapCompiler
             this.logPrint.Text = "Print log";
             this.logPrint.UseVisualStyleBackColor = true;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(9, 575);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(52, 13);
+            this.label8.TabIndex = 49;
+            this.label8.Text = "Game dir:";
+            // 
+            // gamedir
+            // 
+            this.gamedir.AutoSize = true;
+            this.gamedir.Location = new System.Drawing.Point(60, 575);
+            this.gamedir.MaximumSize = new System.Drawing.Size(450, 0);
+            this.gamedir.Name = "gamedir";
+            this.gamedir.Size = new System.Drawing.Size(27, 13);
+            this.gamedir.TabIndex = 50;
+            this.gamedir.Text = "N/A";
+            // 
+            // bakeCustom
+            // 
+            this.bakeCustom.AutoSize = true;
+            this.bakeCustom.Checked = true;
+            this.bakeCustom.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.bakeCustom.Location = new System.Drawing.Point(182, 400);
+            this.bakeCustom.Name = "bakeCustom";
+            this.bakeCustom.Size = new System.Drawing.Size(115, 17);
+            this.bakeCustom.TabIndex = 51;
+            this.bakeCustom.Text = "Bake Custom Data";
+            this.bakeCustom.TextAlign = System.Drawing.ContentAlignment.TopLeft;
+            this.bakeCustom.UseVisualStyleBackColor = true;
+            // 
+            // gridNav
+            // 
+            this.gridNav.AutoSize = true;
+            this.gridNav.Location = new System.Drawing.Point(243, 348);
+            this.gridNav.Name = "gridNav";
+            this.gridNav.Size = new System.Drawing.Size(94, 17);
+            this.gridNav.TabIndex = 52;
+            this.gridNav.Text = "Build Grid Nav";
+            this.gridNav.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(472, 616);
+            this.Controls.Add(this.gridNav);
+            this.Controls.Add(this.bakeCustom);
+            this.Controls.Add(this.gamedir);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.logPrint);
             this.Controls.Add(this.vprofPrint);
             this.Controls.Add(this.vconPrint);
@@ -614,7 +664,7 @@ namespace CS2MapCompiler
             this.Controls.Add(this.outputdir);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.button4);
-            this.Controls.Add(this.label5);
+            this.Controls.Add(this.cpuLabel);
             this.Controls.Add(this.cpu);
             this.Controls.Add(this.buildNav);
             this.Controls.Add(this.buildVis);
@@ -665,7 +715,7 @@ namespace CS2MapCompiler
         private System.Windows.Forms.CheckBox buildVis;
         private System.Windows.Forms.CheckBox buildNav;
         private System.Windows.Forms.CheckBox cpu;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label cpuLabel;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label outputdir;
@@ -692,6 +742,10 @@ namespace CS2MapCompiler
         private System.Windows.Forms.CheckBox vconPrint;
         private System.Windows.Forms.CheckBox vprofPrint;
         private System.Windows.Forms.CheckBox logPrint;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label gamedir;
+        private System.Windows.Forms.CheckBox bakeCustom;
+        private System.Windows.Forms.CheckBox gridNav;
     }
 }
 
