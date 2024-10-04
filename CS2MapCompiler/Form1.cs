@@ -228,7 +228,11 @@ namespace CS2MapCompiler
             if (buildVis.Checked)
             {
                 args.Add("-vis");
-            }            
+            }
+            if (buildNav.Checked)
+            {
+                args.Add("-nav");
+            }
             if (navDbg.Checked)
             {
                 args.Add("-navdbg");
