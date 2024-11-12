@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,7 @@ namespace CS2MapCompiler
         string mappath;
         string outputpath;
         string arg;
+        bool sourcetwentytwenty = false;
         static string output;
         Process process;
         private string GetCS2Dir()
@@ -100,15 +102,30 @@ namespace CS2MapCompiler
                     button1.Enabled = true;
                     if (exe != "cs2.exe" && exe != "project8.exe" && exe != "dota2.exe")
                     {
+                        sourcetwentytwenty = true;                                            
+                    }
+
+                    if (sourcetwentytwenty == true)
+                    {
                         cpu.Enabled = false;
                         cpu.Visible = false;
-                        cpuLabel.Text = "GPU lightmap not supported! CPU will be used by default.";
+                        legacyCompileColMesh.Enabled = false;
+                        legacyCompileColMesh.Visible = false;
+                        bakeCustom.Enabled = false;
+                        bakeCustom.Visible = false;
+                        AudioThreadsBox.Visible = false;
+                        AudioThreadsBox.Enabled = false;
+                        AudioThreadsLabel.Visible = false;
+                        AudioThreadsLabel.Enabled = false;
+                        cpuLabel.Text = "Only CPU lightmap is supported.";
                     }
 
                     if (exe !="dota2.exe")
                     {
                         gridNav.Enabled = false;
                         gridNav.Visible = false;
+                        nolightmaps.Enabled = false;
+                        nolightmaps.Visible = false;
                     } else
                     if (exe == "dota2.exe")
                     {
@@ -170,12 +187,12 @@ namespace CS2MapCompiler
             if(buildworld.Checked)
             {
                 args.Add("-world");
+                args.Remove("-entities");
             }
-            else if (entsOnly.Checked)
+            if (entsOnly.Checked)
             {             
                 args.Add("-entities");
-                args.Remove("-lightmapMaxResolution " + lightmapres.Text);
-                args.Remove("-lightmapVRadQuality " + lightmapquality.SelectedIndex.ToString());
+                args.Remove("-world");              
                 args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 args.Remove($"-sacustomdata_threads {AudioThreadsBox.SelectedItem}");
@@ -188,9 +205,21 @@ namespace CS2MapCompiler
             {
                 args.Add("-debugvisgeo");
             }
+            if (onlyBaseTileMesh.Checked)
+            {
+                args.Add("-tileMeshBaseGeometry");
+            }
             if (genLightmaps.Checked)
             {
                 args.Add("-bakelighting");
+                if (sourcetwentytwenty == true)
+                {
+                    args.Add("-vrad3");
+                    if (compression.Checked)
+                    {
+                        args.Add("-lightmapCompressionDisabled 0");
+                    }
+                }
                 if (cpu.Checked)
                 {
                     args.Add("-lightmapcpu");
@@ -198,9 +227,18 @@ namespace CS2MapCompiler
                 args.Add("-lightmapMaxResolution " + lightmapres.Text);
                 args.Add("-lightmapDoWeld");
                 args.Add("-lightmapVRadQuality " + lightmapquality.SelectedIndex.ToString());
-                if(!compression.Checked)
+                if(!noiseremoval.Checked)
                 {
                     args.Add("-lightmapDisableFiltering");
+                }              
+                if (!compression.Checked)
+                {
+                    args.Add("-lightmapCompressionDisabled");
+                    if (sourcetwentytwenty == true)
+                    {
+                        args.Remove("-lightmapCompressionDisabled 0");
+                        args.Add("-lightmapCompressionDisabled 1");
+                    }
                 }
                 if (noLightCalc.Checked)
                 {
@@ -213,17 +251,28 @@ namespace CS2MapCompiler
                 if (writeDebugPT.Checked)
                 {
                     args.Add("-write_debug_path_trace_scene_info");
-                }
-                args.Add("-lightmapLocalCompile");
-                
+                }               
+                args.Add("-lightmapLocalCompile");             
             }
             else if(!genLightmaps.Checked)
             {
+                args.Add("-nolightmaps");              
+            }
+            /*if (nolightmaps.Checked)
+            {
                 args.Add("-nolightmaps");
             }
+            if (!nolightmaps.Checked)
+            {
+                args.Remove("-nolightmaps");
+            }*/
             if(buildPhys.Checked)
             {
                 args.Add("-phys");
+            }
+            if (legacyCompileColMesh.Checked)
+            {
+                args.Add("-legacycompilecollisionmesh");
             }
             if (buildVis.Checked)
             {
@@ -245,11 +294,19 @@ namespace CS2MapCompiler
             {
                 args.Add("-sareverb");
                 args.Add($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                if (sourcetwentytwenty == true)
+                {
+                    args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                }
             }
             if (baPaths.Checked)
             {
                 args.Add("-sapaths");
                 args.Add($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                if (sourcetwentytwenty == true)
+                {
+                    args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
+                }
             }
             if (bakeCustom.Checked)
             {
@@ -269,9 +326,15 @@ namespace CS2MapCompiler
             {
                 args.Add("-condebug");
                 args.Add("-consolelog");
-            }
+            }           
             args.Add("-retail -breakpad -nop4 -outroot ");
-            return argument + string.Join(" ",args.ToArray());
+            if (sourcetwentytwenty == true)
+            {
+                args.Add("-retail -breakpad -nompi -nop4 -outroot ");
+                args.Remove("-retail -breakpad -nop4 -outroot ");
+            }             
+            return argument + string.Join(" ",args.ToArray());   
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -312,7 +375,7 @@ namespace CS2MapCompiler
 
             process.Start();
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("(CS2MapCompiler) Compile started! - " + DateTime.Now + "\n");
+            Console.WriteLine("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler +" "+ arg + "\nTime: " + DateTime.Now + "\n");
             Console.ForegroundColor = ConsoleColor.White;
             //* Read one element asynchronously
             //* Read the other one synchronously
@@ -351,7 +414,7 @@ namespace CS2MapCompiler
             {
                 cs2dir = Path.GetDirectoryName(file.FileName);
                 CS2Validator();
-                gamedir.Text = cs2dir;
+                gamedir.Text = cs2dir;              
             }
         }
 
@@ -359,6 +422,7 @@ namespace CS2MapCompiler
         {
             if(genLightmaps.Checked == false)
             {
+
                 cpu.Enabled = false;
                 lightmapres.Enabled = false;
                 lightmapquality.Enabled = false;
@@ -367,17 +431,21 @@ namespace CS2MapCompiler
                 noLightCalc.Enabled = false;
                 useDeterCharts.Enabled = false;
                 writeDebugPT.Enabled = false;
+                /*nolightmaps.Enabled = true;
+                nolightmaps.Visible = false;*/
             }
             else
             {
+                /*nolightmaps.Enabled = false;
+                nolightmaps.Visible = false;*/
                 cpu.Enabled = true;
                 lightmapres.Enabled = true;
                 lightmapquality.Enabled = true;
                 compression.Enabled = true;
                 noiseremoval.Enabled = true;
                 noLightCalc.Enabled = true;
-                useDeterCharts.Checked = true;
-                writeDebugPT.Checked = true;
+                useDeterCharts.Enabled = true;
+                writeDebugPT.Enabled = true;
             }
 
         }
@@ -490,38 +558,7 @@ namespace CS2MapCompiler
                 bakeCustom.Enabled = true;
             }
             else
-            {
-                genLightmaps.Enabled = false;
-                cpu.Enabled = false;
-                lightmapres.Enabled = false;
-                lightmapquality.Enabled = false;
-                noiseremoval.Enabled = false;
-                compression.Enabled = false;
-                useDeterCharts.Enabled = false;
-                noLightCalc.Enabled = false;
-                writeDebugPT.Enabled = false;
-                buildPhys.Enabled = false;
-                buildVis.Enabled = false;
-                buildNav.Enabled = false;
-                navDbg.Enabled = false;
-                saReverb.Enabled = false;
-                baPaths.Enabled = false;
-                bakeCustom.Enabled = false;
-
-                genLightmaps.Checked = false;
-                cpu.Checked = false;
-                noiseremoval.Checked = false;
-                compression.Checked = false;
-                useDeterCharts.Checked = false;
-                noLightCalc.Checked = false;
-                writeDebugPT.Checked = false;
-                buildPhys.Checked = false;
-                buildVis.Checked = false;
-                buildNav.Checked = false;
-                navDbg.Checked = false;
-                saReverb.Checked = false;
-                baPaths.Checked = false;
-                bakeCustom.Checked = false;
+            {              
             }
         }
     }

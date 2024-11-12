@@ -82,6 +82,11 @@ namespace CS2MapCompiler
             this.gamedir = new System.Windows.Forms.Label();
             this.bakeCustom = new System.Windows.Forms.CheckBox();
             this.gridNav = new System.Windows.Forms.CheckBox();
+            this.nolightmaps = new System.Windows.Forms.CheckBox();
+            this.onlyBaseTileMesh = new System.Windows.Forms.CheckBox();
+            this.legacyCompileColMesh = new System.Windows.Forms.CheckBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cmdLine = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // timer1
@@ -186,7 +191,7 @@ namespace CS2MapCompiler
             this.genLightmaps.AutoSize = true;
             this.genLightmaps.Checked = true;
             this.genLightmaps.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.genLightmaps.Location = new System.Drawing.Point(6, 194);
+            this.genLightmaps.Location = new System.Drawing.Point(6, 181);
             this.genLightmaps.Name = "genLightmaps";
             this.genLightmaps.Size = new System.Drawing.Size(121, 17);
             this.genLightmaps.TabIndex = 10;
@@ -197,7 +202,7 @@ namespace CS2MapCompiler
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 226);
+            this.label3.Location = new System.Drawing.Point(3, 213);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(60, 13);
             this.label3.TabIndex = 11;
@@ -212,7 +217,7 @@ namespace CS2MapCompiler
             "2048",
             "1024",
             "512"});
-            this.lightmapres.Location = new System.Drawing.Point(72, 223);
+            this.lightmapres.Location = new System.Drawing.Point(72, 210);
             this.lightmapres.Name = "lightmapres";
             this.lightmapres.Size = new System.Drawing.Size(55, 21);
             this.lightmapres.TabIndex = 12;
@@ -220,7 +225,7 @@ namespace CS2MapCompiler
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(136, 226);
+            this.label4.Location = new System.Drawing.Point(136, 213);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(42, 13);
             this.label4.TabIndex = 13;
@@ -233,7 +238,7 @@ namespace CS2MapCompiler
             "Fast",
             "Standard",
             "Final"});
-            this.lightmapquality.Location = new System.Drawing.Point(184, 223);
+            this.lightmapquality.Location = new System.Drawing.Point(184, 210);
             this.lightmapquality.Name = "lightmapquality";
             this.lightmapquality.Size = new System.Drawing.Size(82, 21);
             this.lightmapquality.TabIndex = 14;
@@ -243,7 +248,7 @@ namespace CS2MapCompiler
             this.compression.AutoSize = true;
             this.compression.Checked = true;
             this.compression.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.compression.Location = new System.Drawing.Point(282, 225);
+            this.compression.Location = new System.Drawing.Point(282, 212);
             this.compression.Name = "compression";
             this.compression.Size = new System.Drawing.Size(86, 17);
             this.compression.TabIndex = 15;
@@ -255,7 +260,7 @@ namespace CS2MapCompiler
             this.noiseremoval.AutoSize = true;
             this.noiseremoval.Checked = true;
             this.noiseremoval.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.noiseremoval.Location = new System.Drawing.Point(7, 261);
+            this.noiseremoval.Location = new System.Drawing.Point(8, 237);
             this.noiseremoval.Name = "noiseremoval";
             this.noiseremoval.Size = new System.Drawing.Size(98, 17);
             this.noiseremoval.TabIndex = 16;
@@ -267,7 +272,7 @@ namespace CS2MapCompiler
             this.buildPhys.AutoSize = true;
             this.buildPhys.Checked = true;
             this.buildPhys.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.buildPhys.Location = new System.Drawing.Point(7, 348);
+            this.buildPhys.Location = new System.Drawing.Point(5, 318);
             this.buildPhys.Name = "buildPhys";
             this.buildPhys.Size = new System.Drawing.Size(87, 17);
             this.buildPhys.TabIndex = 17;
@@ -279,7 +284,7 @@ namespace CS2MapCompiler
             this.buildVis.AutoSize = true;
             this.buildVis.Checked = true;
             this.buildVis.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.buildVis.Location = new System.Drawing.Point(100, 348);
+            this.buildVis.Location = new System.Drawing.Point(114, 318);
             this.buildVis.Name = "buildVis";
             this.buildVis.Size = new System.Drawing.Size(65, 17);
             this.buildVis.TabIndex = 18;
@@ -291,7 +296,7 @@ namespace CS2MapCompiler
             this.buildNav.AutoSize = true;
             this.buildNav.Checked = true;
             this.buildNav.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.buildNav.Location = new System.Drawing.Point(171, 348);
+            this.buildNav.Location = new System.Drawing.Point(184, 318);
             this.buildNav.Name = "buildNav";
             this.buildNav.Size = new System.Drawing.Size(72, 17);
             this.buildNav.TabIndex = 19;
@@ -301,7 +306,7 @@ namespace CS2MapCompiler
             // cpu
             // 
             this.cpu.AutoSize = true;
-            this.cpu.Location = new System.Drawing.Point(133, 194);
+            this.cpu.Location = new System.Drawing.Point(133, 181);
             this.cpu.Name = "cpu";
             this.cpu.Size = new System.Drawing.Size(70, 17);
             this.cpu.TabIndex = 20;
@@ -313,11 +318,11 @@ namespace CS2MapCompiler
             this.cpuLabel.AutoSize = true;
             this.cpuLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
             this.cpuLabel.ForeColor = System.Drawing.Color.DimGray;
-            this.cpuLabel.Location = new System.Drawing.Point(130, 172);
+            this.cpuLabel.Location = new System.Drawing.Point(130, 159);
             this.cpuLabel.Name = "cpuLabel";
-            this.cpuLabel.Size = new System.Drawing.Size(278, 13);
+            this.cpuLabel.Size = new System.Drawing.Size(268, 13);
             this.cpuLabel.TabIndex = 21;
-            this.cpuLabel.Text = "Use if you don\'t have a RT-capable GPU. Broken in CS2!";
+            this.cpuLabel.Text = "Use if you don\'t have a RT-capable GPU. Now broken!";
             // 
             // button4
             // 
@@ -383,7 +388,7 @@ namespace CS2MapCompiler
             this.CategoryWorld.AutoSize = true;
             this.CategoryWorld.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryWorld.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryWorld.Location = new System.Drawing.Point(52, 41);
+            this.CategoryWorld.Location = new System.Drawing.Point(78, 38);
             this.CategoryWorld.Name = "CategoryWorld";
             this.CategoryWorld.Size = new System.Drawing.Size(35, 13);
             this.CategoryWorld.TabIndex = 29;
@@ -403,7 +408,7 @@ namespace CS2MapCompiler
             // debugVisGeo
             // 
             this.debugVisGeo.AutoSize = true;
-            this.debugVisGeo.Location = new System.Drawing.Point(12, 128);
+            this.debugVisGeo.Location = new System.Drawing.Point(100, 57);
             this.debugVisGeo.Name = "debugVisGeo";
             this.debugVisGeo.Size = new System.Drawing.Size(123, 17);
             this.debugVisGeo.TabIndex = 31;
@@ -413,7 +418,7 @@ namespace CS2MapCompiler
             // noLightCalc
             // 
             this.noLightCalc.AutoSize = true;
-            this.noLightCalc.Location = new System.Drawing.Point(111, 261);
+            this.noLightCalc.Location = new System.Drawing.Point(112, 237);
             this.noLightCalc.Name = "noLightCalc";
             this.noLightCalc.Size = new System.Drawing.Size(156, 17);
             this.noLightCalc.TabIndex = 32;
@@ -423,7 +428,7 @@ namespace CS2MapCompiler
             // useDeterCharts
             // 
             this.useDeterCharts.AutoSize = true;
-            this.useDeterCharts.Location = new System.Drawing.Point(6, 293);
+            this.useDeterCharts.Location = new System.Drawing.Point(6, 260);
             this.useDeterCharts.Name = "useDeterCharts";
             this.useDeterCharts.Size = new System.Drawing.Size(193, 17);
             this.useDeterCharts.TabIndex = 33;
@@ -433,7 +438,7 @@ namespace CS2MapCompiler
             // writeDebugPT
             // 
             this.writeDebugPT.AutoSize = true;
-            this.writeDebugPT.Location = new System.Drawing.Point(198, 293);
+            this.writeDebugPT.Location = new System.Drawing.Point(198, 260);
             this.writeDebugPT.Name = "writeDebugPT";
             this.writeDebugPT.Size = new System.Drawing.Size(163, 17);
             this.writeDebugPT.TabIndex = 34;
@@ -445,7 +450,7 @@ namespace CS2MapCompiler
             this.CategoryLight.AutoSize = true;
             this.CategoryLight.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryLight.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryLight.Location = new System.Drawing.Point(181, 148);
+            this.CategoryLight.Location = new System.Drawing.Point(181, 135);
             this.CategoryLight.Name = "CategoryLight";
             this.CategoryLight.Size = new System.Drawing.Size(78, 13);
             this.CategoryLight.TabIndex = 35;
@@ -456,7 +461,7 @@ namespace CS2MapCompiler
             this.CategoryPhys.AutoSize = true;
             this.CategoryPhys.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryPhys.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryPhys.Location = new System.Drawing.Point(9, 323);
+            this.CategoryPhys.Location = new System.Drawing.Point(7, 293);
             this.CategoryPhys.Name = "CategoryPhys";
             this.CategoryPhys.Size = new System.Drawing.Size(43, 13);
             this.CategoryPhys.TabIndex = 36;
@@ -467,7 +472,7 @@ namespace CS2MapCompiler
             this.CategoryVis.AutoSize = true;
             this.CategoryVis.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryVis.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryVis.Location = new System.Drawing.Point(108, 323);
+            this.CategoryVis.Location = new System.Drawing.Point(116, 293);
             this.CategoryVis.Name = "CategoryVis";
             this.CategoryVis.Size = new System.Drawing.Size(43, 13);
             this.CategoryVis.TabIndex = 37;
@@ -478,7 +483,7 @@ namespace CS2MapCompiler
             this.CategoryNav.AutoSize = true;
             this.CategoryNav.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryNav.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryNav.Location = new System.Drawing.Point(168, 323);
+            this.CategoryNav.Location = new System.Drawing.Point(181, 293);
             this.CategoryNav.Name = "CategoryNav";
             this.CategoryNav.Size = new System.Drawing.Size(27, 13);
             this.CategoryNav.TabIndex = 38;
@@ -487,7 +492,7 @@ namespace CS2MapCompiler
             // navDbg
             // 
             this.navDbg.AutoSize = true;
-            this.navDbg.Location = new System.Drawing.Point(171, 371);
+            this.navDbg.Location = new System.Drawing.Point(184, 341);
             this.navDbg.Name = "navDbg";
             this.navDbg.Size = new System.Drawing.Size(146, 17);
             this.navDbg.TabIndex = 39;
@@ -609,8 +614,6 @@ namespace CS2MapCompiler
             // bakeCustom
             // 
             this.bakeCustom.AutoSize = true;
-            this.bakeCustom.Checked = true;
-            this.bakeCustom.CheckState = System.Windows.Forms.CheckState.Checked;
             this.bakeCustom.Location = new System.Drawing.Point(182, 400);
             this.bakeCustom.Name = "bakeCustom";
             this.bakeCustom.Size = new System.Drawing.Size(115, 17);
@@ -622,18 +625,76 @@ namespace CS2MapCompiler
             // gridNav
             // 
             this.gridNav.AutoSize = true;
-            this.gridNav.Location = new System.Drawing.Point(243, 348);
+            this.gridNav.Location = new System.Drawing.Point(256, 318);
             this.gridNav.Name = "gridNav";
             this.gridNav.Size = new System.Drawing.Size(94, 17);
             this.gridNav.TabIndex = 52;
             this.gridNav.Text = "Build Grid Nav";
             this.gridNav.UseVisualStyleBackColor = true;
             // 
+            // nolightmaps
+            // 
+            this.nolightmaps.AutoSize = true;
+            this.nolightmaps.Enabled = false;
+            this.nolightmaps.Location = new System.Drawing.Point(207, 181);
+            this.nolightmaps.Name = "nolightmaps";
+            this.nolightmaps.Size = new System.Drawing.Size(91, 17);
+            this.nolightmaps.TabIndex = 53;
+            this.nolightmaps.Text = "No Lightmaps";
+            this.nolightmaps.UseVisualStyleBackColor = true;
+            this.nolightmaps.Visible = false;
+            // 
+            // onlyBaseTileMesh
+            // 
+            this.onlyBaseTileMesh.AutoSize = true;
+            this.onlyBaseTileMesh.Location = new System.Drawing.Point(100, 82);
+            this.onlyBaseTileMesh.Name = "onlyBaseTileMesh";
+            this.onlyBaseTileMesh.Size = new System.Drawing.Size(163, 17);
+            this.onlyBaseTileMesh.TabIndex = 54;
+            this.onlyBaseTileMesh.Text = "Only base tile mesh geometry";
+            this.onlyBaseTileMesh.UseVisualStyleBackColor = true;
+            // 
+            // legacyCompileColMesh
+            // 
+            this.legacyCompileColMesh.AutoSize = true;
+            this.legacyCompileColMesh.Enabled = false;
+            this.legacyCompileColMesh.Location = new System.Drawing.Point(5, 341);
+            this.legacyCompileColMesh.Name = "legacyCompileColMesh";
+            this.legacyCompileColMesh.Size = new System.Drawing.Size(171, 17);
+            this.legacyCompileColMesh.TabIndex = 55;
+            this.legacyCompileColMesh.Text = "Legacy Compile Collision Mesh";
+            this.legacyCompileColMesh.UseVisualStyleBackColor = true;
+            this.legacyCompileColMesh.Visible = false;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(9, 603);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(76, 13);
+            this.label5.TabIndex = 56;
+            this.label5.Text = "Command line:";
+            // 
+            // cmdLine
+            // 
+            this.cmdLine.AutoSize = true;
+            this.cmdLine.Location = new System.Drawing.Point(86, 603);
+            this.cmdLine.MaximumSize = new System.Drawing.Size(450, 0);
+            this.cmdLine.Name = "cmdLine";
+            this.cmdLine.Size = new System.Drawing.Size(27, 13);
+            this.cmdLine.TabIndex = 57;
+            this.cmdLine.Text = "N/A";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(472, 616);
+            this.ClientSize = new System.Drawing.Size(472, 666);
+            this.Controls.Add(this.cmdLine);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.legacyCompileColMesh);
+            this.Controls.Add(this.onlyBaseTileMesh);
+            this.Controls.Add(this.nolightmaps);
             this.Controls.Add(this.gridNav);
             this.Controls.Add(this.bakeCustom);
             this.Controls.Add(this.gamedir);
@@ -746,6 +807,11 @@ namespace CS2MapCompiler
         private System.Windows.Forms.Label gamedir;
         private System.Windows.Forms.CheckBox bakeCustom;
         private System.Windows.Forms.CheckBox gridNav;
+        private System.Windows.Forms.CheckBox nolightmaps;
+        private System.Windows.Forms.CheckBox onlyBaseTileMesh;
+        private System.Windows.Forms.CheckBox legacyCompileColMesh;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label cmdLine;
     }
 }
 
