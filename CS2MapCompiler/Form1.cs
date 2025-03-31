@@ -29,7 +29,7 @@ namespace CS2MapCompiler
         string mappath;
         string outputpath;
         string arg;
-        bool sourcetwentytwenty = false;
+        bool oldsource2pre2020 = false; // this parameter enables parameters for S2 games pre 2021 and disables the post 2021 parameters.
         static string output;
         Process process;
         private string GetCS2Dir()
@@ -76,6 +76,8 @@ namespace CS2MapCompiler
             cs2dir = GetCS2Dir();
             CS2Validator();
             gamedir.Text = cs2dir;
+            Checkers();
+            HelpSystemEventReg();
 
 
             int cpuCount = Environment.ProcessorCount;
@@ -94,7 +96,7 @@ namespace CS2MapCompiler
 
             foreach (string exe in requiredExecutables)
             {
-                if (File.Exists(Path.Combine(cs2dir,exe)))
+                if (File.Exists(Path.Combine(cs2dir, exe)))
                 {
                     anyExecutableFound = true;
                     cs2status.Text = $"Found {exe}";
@@ -102,10 +104,10 @@ namespace CS2MapCompiler
                     button1.Enabled = true;
                     if (exe != "cs2.exe" && exe != "project8.exe" && exe != "dota2.exe")
                     {
-                        sourcetwentytwenty = true;                                            
+                        oldsource2pre2020 = true;
                     }
 
-                    if (sourcetwentytwenty == true)
+                    if (oldsource2pre2020 == true) //if is not a S2 game post 2021, then disable post 2021 features like GPU VRAD3. 
                     {
                         cpu.Enabled = false;
                         cpu.Visible = false;
@@ -120,14 +122,15 @@ namespace CS2MapCompiler
                         cpuLabel.Text = "Only CPU lightmap is supported.";
                     }
 
-                    if (exe !="dota2.exe")
+                    if (exe != "dota2.exe")
                     {
                         gridNav.Enabled = false;
                         gridNav.Visible = false;
                         nolightmaps.Enabled = false;
                         nolightmaps.Visible = false;
-                    } else
-                    if (exe == "dota2.exe")
+                    }
+                    else
+                    if (exe == "dota2.exe") //if dota 2 - show grid nav button and uncheck others.
                     {
                         gridNav.Enabled = true;
                         gridNav.Visible = true;
@@ -171,28 +174,28 @@ namespace CS2MapCompiler
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            
+
         }
 
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
 
         }
-            
+
         string ArgumentBuilder()
         {
             List<string> args = new List<string>();
-            string argument = $"-threads {threadcount.SelectedItem} -fshallow -maxtextureres 256 -dxlevel 110 -quiet -unbufferedio -i " + string.Format("\"{0}\"",mappath) + " -noassert ";
-            
-            if(buildworld.Checked)
+            string argument = $"-threads {threadcount.SelectedItem} -fshallow -maxtextureres 256 -dxlevel 110 -quiet -unbufferedio -i " + string.Format("\"{0}\"", mappath) + " -noassert ";
+
+            if (buildworld.Checked)
             {
                 args.Add("-world");
                 args.Remove("-entities");
             }
             if (entsOnly.Checked)
-            {             
+            {
                 args.Add("-entities");
-                args.Remove("-world");              
+                args.Remove("-world");
                 args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 args.Remove($"-sacustomdata_threads {AudioThreadsBox.SelectedItem}");
@@ -212,7 +215,7 @@ namespace CS2MapCompiler
             if (genLightmaps.Checked)
             {
                 args.Add("-bakelighting");
-                if (sourcetwentytwenty == true)
+                if (oldsource2pre2020 == true)
                 {
                     args.Add("-vrad3");
                     if (compression.Checked)
@@ -227,14 +230,14 @@ namespace CS2MapCompiler
                 args.Add("-lightmapMaxResolution " + lightmapres.Text);
                 args.Add("-lightmapDoWeld");
                 args.Add("-lightmapVRadQuality " + lightmapquality.SelectedIndex.ToString());
-                if(!noiseremoval.Checked)
+                if (!noiseremoval.Checked)
                 {
                     args.Add("-lightmapDisableFiltering");
-                }              
+                }
                 if (!compression.Checked)
                 {
                     args.Add("-lightmapCompressionDisabled");
-                    if (sourcetwentytwenty == true)
+                    if (oldsource2pre2020 == true)
                     {
                         args.Remove("-lightmapCompressionDisabled 0");
                         args.Add("-lightmapCompressionDisabled 1");
@@ -251,12 +254,12 @@ namespace CS2MapCompiler
                 if (writeDebugPT.Checked)
                 {
                     args.Add("-write_debug_path_trace_scene_info");
-                }               
-                args.Add("-lightmapLocalCompile");             
+                }
+                args.Add("-lightmapLocalCompile");
             }
-            else if(!genLightmaps.Checked)
+            else if (!genLightmaps.Checked)
             {
-                args.Add("-nolightmaps");              
+                args.Add("-nolightmaps");
             }
             /*if (nolightmaps.Checked)
             {
@@ -266,7 +269,7 @@ namespace CS2MapCompiler
             {
                 args.Remove("-nolightmaps");
             }*/
-            if(buildPhys.Checked)
+            if (buildPhys.Checked)
             {
                 args.Add("-phys");
             }
@@ -294,7 +297,7 @@ namespace CS2MapCompiler
             {
                 args.Add("-sareverb");
                 args.Add($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
-                if (sourcetwentytwenty == true)
+                if (oldsource2pre2020 == true)
                 {
                     args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 }
@@ -303,7 +306,7 @@ namespace CS2MapCompiler
             {
                 args.Add("-sapaths");
                 args.Add($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
-                if (sourcetwentytwenty == true)
+                if (oldsource2pre2020 == true)
                 {
                     args.Remove($"-sareverb_threads {AudioThreadsBox.SelectedItem}");
                 }
@@ -326,15 +329,21 @@ namespace CS2MapCompiler
             {
                 args.Add("-condebug");
                 args.Add("-consolelog");
-            }           
+            }
             args.Add("-retail -breakpad -nop4 -outroot ");
-            if (sourcetwentytwenty == true)
+            if (oldsource2pre2020 == true)
             {
                 args.Add("-retail -breakpad -nompi -nop4 -outroot ");
                 args.Remove("-retail -breakpad -nop4 -outroot ");
-            }             
-            return argument + string.Join(" ",args.ToArray());   
-            
+            }
+            return argument + string.Join(" ", args.ToArray());
+
+        }
+
+        void UpdateArgLabel()
+        {
+            string myarg = ArgumentBuilder();
+            cmdLine.Text = myarg;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -360,31 +369,31 @@ namespace CS2MapCompiler
                 task.Start();
             }
         }
-        
+
         private void ProcessThread()
         {
-            
+
             process.StartInfo.FileName = resourcecompiler;
             process.StartInfo.Arguments = arg;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardError = true;
-            
+
             //* Set ONLY ONE handler here.
-            
+
             //* Start process
 
             process.Start();
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler +" "+ arg + "\nTime: " + DateTime.Now + "\n");
+            Console.WriteLine("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler + " " + arg + "\nTime: " + DateTime.Now + "\n");
             Console.ForegroundColor = ConsoleColor.White;
             //* Read one element asynchronously
             //* Read the other one synchronously
 
             output = process.StandardError.ReadToEnd();
             Console.WriteLine(output);
-            
+
             process.WaitForExit();
-            
+
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -414,13 +423,13 @@ namespace CS2MapCompiler
             {
                 cs2dir = Path.GetDirectoryName(file.FileName);
                 CS2Validator();
-                gamedir.Text = cs2dir;              
+                gamedir.Text = cs2dir;
             }
         }
 
         private void genLightmaps_CheckedChanged(object sender, EventArgs e)
         {
-            if(genLightmaps.Checked == false)
+            if (genLightmaps.Checked == false)
             {
 
                 cpu.Enabled = false;
@@ -447,9 +456,51 @@ namespace CS2MapCompiler
                 useDeterCharts.Enabled = true;
                 writeDebugPT.Enabled = true;
             }
-
         }
-
+        void Checkers()
+        {
+            //World
+            buildworld.CheckedChanged += OnSettingChanged;
+            entsOnly.CheckedChanged += OnSettingChanged;
+            settlephys.CheckedChanged += OnSettingChanged;
+            debugVisGeo.CheckedChanged += OnSettingChanged;
+            onlyBaseTileMesh.CheckedChanged += OnSettingChanged;
+            threadcount.SelectedIndexChanged += OnSettingChanged;
+            button3.Click += OnSettingChanged;
+            //Baked Lighting
+            genLightmaps.CheckedChanged += OnSettingChanged;
+            cpu.CheckedChanged += OnSettingChanged;
+            nolightmaps.CheckedChanged += OnSettingChanged;
+            lightmapres.SelectedIndexChanged += OnSettingChanged;
+            lightmapquality.SelectedIndexChanged += OnSettingChanged;
+            compression.CheckedChanged += OnSettingChanged;
+            noiseremoval.CheckedChanged += OnSettingChanged;
+            noLightCalc.CheckedChanged += OnSettingChanged;
+            useDeterCharts.CheckedChanged += OnSettingChanged;
+            writeDebugPT.CheckedChanged += OnSettingChanged;
+            //Phys
+            buildPhys.CheckedChanged += OnSettingChanged;
+            legacyCompileColMesh.CheckedChanged += OnSettingChanged;
+            //Vis
+            buildVis.CheckedChanged += OnSettingChanged;
+            //Nav
+            buildNav.CheckedChanged += OnSettingChanged;
+            gridNav.CheckedChanged += OnSettingChanged;
+            navDbg.CheckedChanged += OnSettingChanged;
+            //Steam Audio
+            saReverb.CheckedChanged += OnSettingChanged;
+            baPaths.CheckedChanged += OnSettingChanged;
+            bakeCustom.CheckedChanged += OnSettingChanged;
+            AudioThreadsBox.SelectedIndexChanged += OnSettingChanged;
+            //Extra
+            vconPrint.CheckedChanged += OnSettingChanged;
+            vprofPrint.CheckedChanged += OnSettingChanged;
+            logPrint.CheckedChanged += OnSettingChanged;
+        }
+        private void OnSettingChanged(object sender, EventArgs e)
+        {
+            UpdateArgLabel();
+        }
         private void button4_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
@@ -483,6 +534,7 @@ namespace CS2MapCompiler
                 outputpath = Directory.GetParent(cs2dir).Parent.FullName;
                 outputdir.Text = outputpath;
                 button5.Enabled = true;
+                UpdateArgLabel();
             }
         }
 
@@ -491,7 +543,7 @@ namespace CS2MapCompiler
             string dummyFileName = "Select Here";
             SaveFileDialog file = new SaveFileDialog();
 
-        string[] addonDirectories = {
+            string[] addonDirectories = {
         "csgo_addons",
         "hlvr_addons",
         "citadel_addons",
@@ -558,8 +610,310 @@ namespace CS2MapCompiler
                 bakeCustom.Enabled = true;
             }
             else
-            {              
+            {
             }
         }
+
+        private void PresetFullBuild_Click(object sender, EventArgs e)
+        {
+            //World
+            buildworld.Checked = true;
+            entsOnly.Checked = false;
+            settlephys.Checked = true;
+            debugVisGeo.Checked = false;
+            onlyBaseTileMesh.Checked = false;
+            //Baked Lighting
+            genLightmaps.Enabled = true;
+            genLightmaps.Checked = true;
+            cpu.Checked = false;
+            nolightmaps.Checked = false;
+            lightmapres.SelectedIndex = 3;
+            lightmapquality.SelectedIndex = 1;
+            compression.Checked = true;
+            noiseremoval.Checked = true;
+            noLightCalc.Checked = false;
+            useDeterCharts.Checked = false;
+            writeDebugPT.Checked = false;
+            //Phys
+            buildPhys.Checked = true;
+            legacyCompileColMesh.Checked = false;
+            //Vis
+            buildVis.Checked = true;
+            //Nav
+            buildNav.Checked = true;
+            if (gridNav.Enabled)
+            {
+                gridNav.Checked = true;
+            }
+            navDbg.Checked = false;
+            //Steam Audio
+            saReverb.Checked = true;
+            baPaths.Checked = true;
+            bakeCustom.Checked = false; //yet
+            //Extra
+            vconPrint.Checked = false;
+            vprofPrint.Checked = false;
+            logPrint.Checked = false;         
+        }
+
+        private void PresetFastBuild_Click(object sender, EventArgs e)
+        {
+            //World
+            buildworld.Checked = true;
+            entsOnly.Checked = false;
+            settlephys.Checked = true;
+            debugVisGeo.Checked = false;
+            onlyBaseTileMesh.Checked = false;
+            //Baked Lighting
+            genLightmaps.Checked = false;
+            genLightmaps.Enabled = false;
+            //Phys
+            buildPhys.Checked = true;
+            legacyCompileColMesh.Checked = false;
+            //Vis
+            buildVis.Checked = false;
+            //Nav
+            buildNav.Checked = true;
+            if (gridNav.Enabled)
+            {
+                gridNav.Checked = true;
+            }
+            navDbg.Checked = false;
+            //Steam Audio
+            saReverb.Checked = false;
+            baPaths.Checked = false;
+            bakeCustom.Checked = false; //yet
+            //Extra
+            vconPrint.Checked = false;
+            vprofPrint.Checked = false;
+            logPrint.Checked = false;         
+        }
+
+        private void PresetFinalBuild_Click(object sender, EventArgs e)
+        {
+            //World
+            buildworld.Checked = true;
+            entsOnly.Checked = false;
+            settlephys.Checked = true;
+            debugVisGeo.Checked = false;
+            onlyBaseTileMesh.Checked = false;
+            //Baked Lighting
+            genLightmaps.Enabled = true;
+            genLightmaps.Checked = true;
+            cpu.Checked = false;
+            nolightmaps.Checked = false;
+            lightmapres.SelectedIndex = 2;
+            lightmapquality.SelectedIndex = 2;
+            compression.Checked = true;
+            noiseremoval.Checked = true;
+            noLightCalc.Checked = false;
+            useDeterCharts.Checked = false;
+            writeDebugPT.Checked = false;
+            //Phys
+            buildPhys.Checked = true;
+            legacyCompileColMesh.Checked = false;
+            //Vis
+            buildVis.Checked = true;
+            //Nav
+            buildNav.Checked = true;
+            if (gridNav.Enabled)
+            {
+                gridNav.Checked = true;
+            }
+            navDbg.Checked = false;
+            //Steam Audio
+            saReverb.Checked = true;
+            baPaths.Checked = true;
+            bakeCustom.Checked = false; //yet
+            //Extra
+            vconPrint.Checked = false;
+            vprofPrint.Checked = false;
+            logPrint.Checked = false;            
+        }
+
+        private void PresetOnlyEntities_Click(object sender, EventArgs e)
+        {
+            //World
+            buildworld.Checked = true;
+            entsOnly.Checked = true;
+            settlephys.Checked = true;
+            debugVisGeo.Checked = false;
+            onlyBaseTileMesh.Checked = false;
+            //Baked Lighting
+            genLightmaps.Checked = false;
+            genLightmaps.Enabled = false;
+            //Phys
+            buildPhys.Checked = false;
+            legacyCompileColMesh.Checked = false;
+            //Vis
+            buildVis.Checked = false;
+            //Nav
+            buildNav.Checked = false;
+            if (gridNav.Enabled)
+            {
+                gridNav.Checked = false;
+            }
+            navDbg.Checked = false;
+            //Steam Audio
+            saReverb.Checked = false;
+            baPaths.Checked = false;
+            bakeCustom.Checked = false; //yet
+            //Extra
+            vconPrint.Checked = false;
+            vprofPrint.Checked = false;
+            logPrint.Checked = false;            
+        }
+
+        private void PresetCustom_Click(object sender, EventArgs e)
+        {
+            //World
+            buildworld.Checked = true;
+            entsOnly.Checked = false;
+            settlephys.Checked = true;
+            debugVisGeo.Checked = false;
+            onlyBaseTileMesh.Checked = false;
+            //Baked Lighting
+            genLightmaps.Enabled = true;
+            genLightmaps.Checked = true;
+            cpu.Checked = false;
+            nolightmaps.Checked = false;
+            lightmapres.SelectedIndex = 3;
+            lightmapquality.SelectedIndex = 1;
+            compression.Checked = true;
+            noiseremoval.Checked = true;
+            noLightCalc.Checked = false;
+            useDeterCharts.Checked = false;
+            writeDebugPT.Checked = false;
+            //Phys
+            buildPhys.Checked = true;
+            legacyCompileColMesh.Checked = false;
+            //Vis
+            buildVis.Checked = true;
+            //Nav
+            buildNav.Checked = true;
+            if (gridNav.Enabled)
+            {
+                gridNav.Checked = true;
+            }
+            navDbg.Checked = false;
+            //Steam Audio
+            saReverb.Checked = true;
+            baPaths.Checked = true;
+            bakeCustom.Checked = false; //yet
+            //Extra
+            vconPrint.Checked = true;
+            vprofPrint.Checked = true;
+            logPrint.Checked = true;          
+        }
+
+        private Dictionary<string, string> _helpText = new Dictionary<string, string>
+        {
+            {"labelThreads", "Amount of CPU threads used by the compiler."},
+            {"labelCancel", "Cancel build."},
+            {"labelCustomPath", "Override game path."},
+            {"labelgamestatus", "Current game status. Game executable must be present."},
+            {"labeltoolstatus", "Current tools status. resourcecompiler.exe must be present."},
+            {"labeloverrideoutput", "Override map vpk output path."},
+            {"labelopenvmap", "Open .vmap file."},
+            {"labelCompile", "Begin map compilation."},
+            {"labelBuildWorld", "Build world."},
+            {"labelEntsOnly", "Compile only entities. Useful for testing small changes."},
+            {"labelSettlePhys", "Pre-Settle physics objects."},
+            {"labelDebugVisGeo", "Debug VIS Geometry."},
+            {"labelOnlyBaseTileMesh", "Only base Tile Mesh geometry."},
+            {"labelgenLightmaps", "Bake lightmaps. GPU with RT support required."},
+            {"labellightmapres", "Lightmap resolution. 1024 - Standard, 2048 - Final, 8192 - Shipping / Final."},
+            {"labellightmapquality", "Lightmap quality."},
+            {"labelgenLightmapsAlyx", "Bake lightmaps. Uses CPU for compilation."},
+            {"labelCPUcompile", "Use CPU for lightmap compilation. Removed in CS2 after Oct 3, 2024."},
+            {"labelCompression", "Enable/Disable lightmap compression."},
+            {"labelnoiseremoval", "Enable/Disable lightmap denoising."},
+            {"labelnoLightCalc", "Disable lighting calculations (useful for debugging texel density/chart allocation)."},
+            {"labeluseDeterCharts", "Use Deterministic lightmap charts during bake."},
+            {"labelwriteDebugPT", "Write debug Path Trace scene info into a file."},
+            {"labelbuildPhys", "Build collision physics mesh."},
+            {"labellegacyCompileColMesh", "Build legacy collision physics mesh."},
+            {"labelbuildVis", "Build visibility for optimization. Must be set to On in shipping maps."},
+            {"labelbuildNav", "Build navigation mesh for NPCs / CS Bots."},
+            {"labelgridNav", "Build grid navigation mesh for Dota NPCs."},
+            {"labelnavDbg", "Save nav debug stages to file."},
+            {"labelsaReverb", "Build Steam Audio reverb data."},
+            {"labelsaPaths", "Build Steam Audio pathing data."},
+            {"labelsaThreads", "CPU threads used for Steam Audio build."},
+            {"labelbakeCustom", "Build Steam Audio custom data (occlusions and materials)."},
+            {"labelvconPrint", "Print resourcecompiler data to VConsole (Default port 29000)"},
+            {"labelvprofPrint", "Print VProf stats at the end of compilation."},
+            {"labellogPrint", "Save resourcecompiler log to console.log in game/mod."},
+            {"labelfullbuild", "Standard compile of all map components"},
+            {"labelfastbuild", "Build world, phys or nav but no vis or lighting"},
+            {"labelfinalbuild", "Build everything, including final quality lighting"},
+            {"labelentsonly", "Build Entities. Nothing else!"},
+            {"labelcustom", "Custom"},
+        };
+
+        void HelpSystemEventReg()
+        {
+            //General
+            threadcount.MouseHover += Control_MouseEnter;
+            button1.MouseHover += Control_MouseEnter;
+            button2.MouseHover += Control_MouseEnter;
+            button3.MouseHover += Control_MouseEnter;
+            button4.MouseHover += Control_MouseEnter;
+            button5.MouseHover += Control_MouseEnter;
+            cs2status.MouseHover += Control_MouseEnter;
+            wststatus.MouseHover += Control_MouseEnter;
+            PresetFullBuild.MouseHover += Control_MouseEnter;
+            PresetFastBuild.MouseHover += Control_MouseEnter;
+            PresetFinalBuild.MouseHover += Control_MouseEnter;
+            PresetOnlyEntities.MouseHover += Control_MouseEnter;
+            PresetCustom.MouseHover += Control_MouseEnter;
+            //World
+            buildworld.MouseHover += Control_MouseEnter;
+            entsOnly.MouseHover += Control_MouseEnter;
+            settlephys.MouseHover += Control_MouseEnter;
+            debugVisGeo.MouseHover += Control_MouseEnter;
+            onlyBaseTileMesh.MouseHover += Control_MouseEnter;
+            //Baked Lighting
+            genLightmaps.MouseHover += Control_MouseEnter;         
+            cpu.MouseHover += Control_MouseEnter;
+            lightmapquality.MouseHover += Control_MouseEnter;
+            lightmapres.MouseHover += Control_MouseEnter;
+            nolightmaps.MouseHover += Control_MouseEnter;
+            compression.MouseHover += Control_MouseEnter;
+            noiseremoval.MouseHover += Control_MouseEnter;
+            noLightCalc.MouseHover += Control_MouseEnter;
+            useDeterCharts.MouseHover += Control_MouseEnter;
+            writeDebugPT.MouseHover += Control_MouseEnter;
+            //Phys
+            buildPhys.MouseHover += Control_MouseEnter;
+            legacyCompileColMesh.MouseHover += Control_MouseEnter;
+            //Vis
+            buildVis.MouseHover += Control_MouseEnter;
+            //Nav
+            buildNav.MouseHover += Control_MouseEnter;
+            gridNav.MouseHover += Control_MouseEnter;
+            navDbg.MouseHover += Control_MouseEnter;
+            //Steam Audio
+            saReverb.MouseHover += Control_MouseEnter;
+            baPaths.MouseHover += Control_MouseEnter;
+            bakeCustom.MouseHover += Control_MouseEnter;
+            AudioThreadsLabel.MouseHover += Control_MouseEnter;
+            AudioThreadsBox.MouseHover += Control_MouseEnter;
+            //Extra
+            vconPrint.MouseHover += Control_MouseEnter;
+            vprofPrint.MouseHover += Control_MouseEnter;
+            logPrint.MouseHover += Control_MouseEnter;
+        }
+
+        private void Control_MouseEnter(object sender, EventArgs e)
+        {
+            Control hoveredControl = (Control)sender;
+            if (hoveredControl.Tag != null &&
+                _helpText.TryGetValue(hoveredControl.Tag.ToString(), out string helpText))
+            {
+                helpLabel.Text = helpText;
+            }
+        }
+
     }
 }

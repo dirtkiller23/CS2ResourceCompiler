@@ -87,6 +87,13 @@ namespace CS2MapCompiler
             this.legacyCompileColMesh = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.cmdLine = new System.Windows.Forms.Label();
+            this.PresetFullBuild = new System.Windows.Forms.Button();
+            this.PresetFastBuild = new System.Windows.Forms.Button();
+            this.PresetFinalBuild = new System.Windows.Forms.Button();
+            this.PresetOnlyEntities = new System.Windows.Forms.Button();
+            this.label9 = new System.Windows.Forms.Label();
+            this.helpLabel = new System.Windows.Forms.Label();
+            this.PresetCustom = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // timer1
@@ -100,6 +107,7 @@ namespace CS2MapCompiler
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 1;
+            this.button1.Tag = "labelCompile";
             this.button1.Text = "Compile";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -110,6 +118,7 @@ namespace CS2MapCompiler
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(75, 23);
             this.button2.TabIndex = 2;
+            this.button2.Tag = "labelCancel";
             this.button2.Text = "Cancel";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
@@ -131,6 +140,7 @@ namespace CS2MapCompiler
             this.cs2status.Name = "cs2status";
             this.cs2status.Size = new System.Drawing.Size(57, 13);
             this.cs2status.TabIndex = 4;
+            this.cs2status.Tag = "labelgamestatus";
             this.cs2status.Text = "Not Found";
             // 
             // label2
@@ -150,6 +160,7 @@ namespace CS2MapCompiler
             this.wststatus.Name = "wststatus";
             this.wststatus.Size = new System.Drawing.Size(57, 13);
             this.wststatus.TabIndex = 6;
+            this.wststatus.Tag = "labeltoolstatus";
             this.wststatus.Text = "Not Found";
             // 
             // button3
@@ -158,6 +169,7 @@ namespace CS2MapCompiler
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(75, 22);
             this.button3.TabIndex = 7;
+            this.button3.Tag = "labelCustomPath";
             this.button3.Text = "Custom Path";
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
@@ -171,6 +183,7 @@ namespace CS2MapCompiler
             this.buildworld.Name = "buildworld";
             this.buildworld.Size = new System.Drawing.Size(80, 17);
             this.buildworld.TabIndex = 8;
+            this.buildworld.Tag = "labelBuildWorld";
             this.buildworld.Text = "Build World";
             this.buildworld.UseVisualStyleBackColor = true;
             // 
@@ -183,6 +196,7 @@ namespace CS2MapCompiler
             this.settlephys.Name = "settlephys";
             this.settlephys.Size = new System.Drawing.Size(147, 17);
             this.settlephys.TabIndex = 9;
+            this.settlephys.Tag = "labelSettlePhys";
             this.settlephys.Text = "Pre-Settle physics objects";
             this.settlephys.UseVisualStyleBackColor = true;
             // 
@@ -195,6 +209,7 @@ namespace CS2MapCompiler
             this.genLightmaps.Name = "genLightmaps";
             this.genLightmaps.Size = new System.Drawing.Size(121, 17);
             this.genLightmaps.TabIndex = 10;
+            this.genLightmaps.Tag = "labelgenLightmaps";
             this.genLightmaps.Text = "Generate Lightmaps";
             this.genLightmaps.UseVisualStyleBackColor = true;
             this.genLightmaps.CheckedChanged += new System.EventHandler(this.genLightmaps_CheckedChanged);
@@ -221,6 +236,7 @@ namespace CS2MapCompiler
             this.lightmapres.Name = "lightmapres";
             this.lightmapres.Size = new System.Drawing.Size(55, 21);
             this.lightmapres.TabIndex = 12;
+            this.lightmapres.Tag = "labellightmapres";
             // 
             // label4
             // 
@@ -242,6 +258,7 @@ namespace CS2MapCompiler
             this.lightmapquality.Name = "lightmapquality";
             this.lightmapquality.Size = new System.Drawing.Size(82, 21);
             this.lightmapquality.TabIndex = 14;
+            this.lightmapquality.Tag = "labellightmapquality";
             // 
             // compression
             // 
@@ -252,6 +269,7 @@ namespace CS2MapCompiler
             this.compression.Name = "compression";
             this.compression.Size = new System.Drawing.Size(86, 17);
             this.compression.TabIndex = 15;
+            this.compression.Tag = "labelCompression";
             this.compression.Text = "Compression";
             this.compression.UseVisualStyleBackColor = true;
             // 
@@ -264,6 +282,7 @@ namespace CS2MapCompiler
             this.noiseremoval.Name = "noiseremoval";
             this.noiseremoval.Size = new System.Drawing.Size(98, 17);
             this.noiseremoval.TabIndex = 16;
+            this.noiseremoval.Tag = "labelnoiseremoval";
             this.noiseremoval.Text = "Noise Removal";
             this.noiseremoval.UseVisualStyleBackColor = true;
             // 
@@ -276,6 +295,7 @@ namespace CS2MapCompiler
             this.buildPhys.Name = "buildPhys";
             this.buildPhys.Size = new System.Drawing.Size(87, 17);
             this.buildPhys.TabIndex = 17;
+            this.buildPhys.Tag = "labelbuildPhys";
             this.buildPhys.Text = "Build physics";
             this.buildPhys.UseVisualStyleBackColor = true;
             // 
@@ -288,6 +308,7 @@ namespace CS2MapCompiler
             this.buildVis.Name = "buildVis";
             this.buildVis.Size = new System.Drawing.Size(65, 17);
             this.buildVis.TabIndex = 18;
+            this.buildVis.Tag = "labelbuildVis";
             this.buildVis.Text = "Build vis";
             this.buildVis.UseVisualStyleBackColor = true;
             // 
@@ -300,6 +321,7 @@ namespace CS2MapCompiler
             this.buildNav.Name = "buildNav";
             this.buildNav.Size = new System.Drawing.Size(72, 17);
             this.buildNav.TabIndex = 19;
+            this.buildNav.Tag = "labelbuildNav";
             this.buildNav.Text = "Build Nav";
             this.buildNav.UseVisualStyleBackColor = true;
             // 
@@ -310,6 +332,7 @@ namespace CS2MapCompiler
             this.cpu.Name = "cpu";
             this.cpu.Size = new System.Drawing.Size(70, 17);
             this.cpu.TabIndex = 20;
+            this.cpu.Tag = "labelCPUcompile";
             this.cpu.Text = "Use CPU";
             this.cpu.UseVisualStyleBackColor = true;
             // 
@@ -326,10 +349,11 @@ namespace CS2MapCompiler
             // 
             // button4
             // 
-            this.button4.Location = new System.Drawing.Point(385, 514);
+            this.button4.Location = new System.Drawing.Point(356, 454);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(75, 21);
             this.button4.TabIndex = 22;
+            this.button4.Tag = "labelopenvmap";
             this.button4.Text = "Open .vmap";
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
@@ -337,7 +361,7 @@ namespace CS2MapCompiler
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 545);
+            this.label6.Location = new System.Drawing.Point(5, 507);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(42, 13);
             this.label6.TabIndex = 23;
@@ -347,7 +371,7 @@ namespace CS2MapCompiler
             // outputdir
             // 
             this.outputdir.AutoSize = true;
-            this.outputdir.Location = new System.Drawing.Point(52, 545);
+            this.outputdir.Location = new System.Drawing.Point(50, 507);
             this.outputdir.MaximumSize = new System.Drawing.Size(450, 0);
             this.outputdir.Name = "outputdir";
             this.outputdir.Size = new System.Drawing.Size(27, 13);
@@ -358,10 +382,11 @@ namespace CS2MapCompiler
             // button5
             // 
             this.button5.Enabled = false;
-            this.button5.Location = new System.Drawing.Point(288, 514);
+            this.button5.Location = new System.Drawing.Point(259, 454);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(91, 21);
             this.button5.TabIndex = 25;
+            this.button5.Tag = "labeloverrideoutput";
             this.button5.Text = "Change Output";
             this.button5.UseVisualStyleBackColor = true;
             this.button5.Click += new System.EventHandler(this.button5_Click);
@@ -382,6 +407,7 @@ namespace CS2MapCompiler
             this.threadcount.Name = "threadcount";
             this.threadcount.Size = new System.Drawing.Size(41, 21);
             this.threadcount.TabIndex = 28;
+            this.threadcount.Tag = "labelThreads";
             // 
             // CategoryWorld
             // 
@@ -401,6 +427,7 @@ namespace CS2MapCompiler
             this.entsOnly.Name = "entsOnly";
             this.entsOnly.Size = new System.Drawing.Size(84, 17);
             this.entsOnly.TabIndex = 30;
+            this.entsOnly.Tag = "labelEntsOnly";
             this.entsOnly.Text = "Entities Only";
             this.entsOnly.UseVisualStyleBackColor = true;
             this.entsOnly.CheckedChanged += new System.EventHandler(this.entsOnly_CheckedChanged);
@@ -412,6 +439,7 @@ namespace CS2MapCompiler
             this.debugVisGeo.Name = "debugVisGeo";
             this.debugVisGeo.Size = new System.Drawing.Size(123, 17);
             this.debugVisGeo.TabIndex = 31;
+            this.debugVisGeo.Tag = "labelDebugVisGeo";
             this.debugVisGeo.Text = "Debug Vis Geometry";
             this.debugVisGeo.UseVisualStyleBackColor = true;
             // 
@@ -422,6 +450,7 @@ namespace CS2MapCompiler
             this.noLightCalc.Name = "noLightCalc";
             this.noLightCalc.Size = new System.Drawing.Size(156, 17);
             this.noLightCalc.TabIndex = 32;
+            this.noLightCalc.Tag = "labelnoLightCalc";
             this.noLightCalc.Text = "Disable lighting calculations";
             this.noLightCalc.UseVisualStyleBackColor = true;
             // 
@@ -432,6 +461,7 @@ namespace CS2MapCompiler
             this.useDeterCharts.Name = "useDeterCharts";
             this.useDeterCharts.Size = new System.Drawing.Size(193, 17);
             this.useDeterCharts.TabIndex = 33;
+            this.useDeterCharts.Tag = "labeluseDeterCharts";
             this.useDeterCharts.Text = "Deterministic charting computations";
             this.useDeterCharts.UseVisualStyleBackColor = true;
             // 
@@ -442,6 +472,7 @@ namespace CS2MapCompiler
             this.writeDebugPT.Name = "writeDebugPT";
             this.writeDebugPT.Size = new System.Drawing.Size(163, 17);
             this.writeDebugPT.TabIndex = 34;
+            this.writeDebugPT.Tag = "labelwriteDebugPT";
             this.writeDebugPT.Text = "Write Debug Path Trace Info";
             this.writeDebugPT.UseVisualStyleBackColor = true;
             // 
@@ -496,6 +527,7 @@ namespace CS2MapCompiler
             this.navDbg.Name = "navDbg";
             this.navDbg.Size = new System.Drawing.Size(146, 17);
             this.navDbg.TabIndex = 39;
+            this.navDbg.Tag = "labelnavDbg";
             this.navDbg.Text = "Save debug stages to file";
             this.navDbg.UseVisualStyleBackColor = true;
             // 
@@ -517,6 +549,7 @@ namespace CS2MapCompiler
             this.AudioThreadsBox.Name = "AudioThreadsBox";
             this.AudioThreadsBox.Size = new System.Drawing.Size(41, 21);
             this.AudioThreadsBox.TabIndex = 42;
+            this.AudioThreadsBox.Tag = "labelsaThreads";
             // 
             // AudioThreadsLabel
             // 
@@ -525,6 +558,7 @@ namespace CS2MapCompiler
             this.AudioThreadsLabel.Name = "AudioThreadsLabel";
             this.AudioThreadsLabel.Size = new System.Drawing.Size(79, 13);
             this.AudioThreadsLabel.TabIndex = 41;
+            this.AudioThreadsLabel.Tag = "labelsaThreads";
             this.AudioThreadsLabel.Text = "Audio Threads:";
             // 
             // saReverb
@@ -536,6 +570,7 @@ namespace CS2MapCompiler
             this.saReverb.Name = "saReverb";
             this.saReverb.Size = new System.Drawing.Size(84, 17);
             this.saReverb.TabIndex = 43;
+            this.saReverb.Tag = "labelsaReverb";
             this.saReverb.Text = "Bake reverb";
             this.saReverb.UseVisualStyleBackColor = true;
             // 
@@ -548,6 +583,7 @@ namespace CS2MapCompiler
             this.baPaths.Name = "baPaths";
             this.baPaths.Size = new System.Drawing.Size(80, 17);
             this.baPaths.TabIndex = 44;
+            this.baPaths.Tag = "labelsaPaths";
             this.baPaths.Text = "Bake paths";
             this.baPaths.UseVisualStyleBackColor = true;
             // 
@@ -569,6 +605,7 @@ namespace CS2MapCompiler
             this.vconPrint.Name = "vconPrint";
             this.vconPrint.Size = new System.Drawing.Size(107, 17);
             this.vconPrint.TabIndex = 46;
+            this.vconPrint.Tag = "labelvconPrint";
             this.vconPrint.Text = "Print to VConsole";
             this.vconPrint.UseVisualStyleBackColor = true;
             // 
@@ -579,6 +616,7 @@ namespace CS2MapCompiler
             this.vprofPrint.Name = "vprofPrint";
             this.vprofPrint.Size = new System.Drawing.Size(111, 17);
             this.vprofPrint.TabIndex = 47;
+            this.vprofPrint.Tag = "labelvprofPrint";
             this.vprofPrint.Text = "Print compile stats";
             this.vprofPrint.UseVisualStyleBackColor = true;
             // 
@@ -589,13 +627,14 @@ namespace CS2MapCompiler
             this.logPrint.Name = "logPrint";
             this.logPrint.Size = new System.Drawing.Size(64, 17);
             this.logPrint.TabIndex = 48;
+            this.logPrint.Tag = "labellogPrint";
             this.logPrint.Text = "Print log";
             this.logPrint.UseVisualStyleBackColor = true;
             // 
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 575);
+            this.label8.Location = new System.Drawing.Point(7, 537);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(52, 13);
             this.label8.TabIndex = 49;
@@ -604,7 +643,7 @@ namespace CS2MapCompiler
             // gamedir
             // 
             this.gamedir.AutoSize = true;
-            this.gamedir.Location = new System.Drawing.Point(60, 575);
+            this.gamedir.Location = new System.Drawing.Point(58, 537);
             this.gamedir.MaximumSize = new System.Drawing.Size(450, 0);
             this.gamedir.Name = "gamedir";
             this.gamedir.Size = new System.Drawing.Size(27, 13);
@@ -618,6 +657,7 @@ namespace CS2MapCompiler
             this.bakeCustom.Name = "bakeCustom";
             this.bakeCustom.Size = new System.Drawing.Size(115, 17);
             this.bakeCustom.TabIndex = 51;
+            this.bakeCustom.Tag = "labelbakeCustom";
             this.bakeCustom.Text = "Bake Custom Data";
             this.bakeCustom.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.bakeCustom.UseVisualStyleBackColor = true;
@@ -629,6 +669,7 @@ namespace CS2MapCompiler
             this.gridNav.Name = "gridNav";
             this.gridNav.Size = new System.Drawing.Size(94, 17);
             this.gridNav.TabIndex = 52;
+            this.gridNav.Tag = "labelgridNav";
             this.gridNav.Text = "Build Grid Nav";
             this.gridNav.UseVisualStyleBackColor = true;
             // 
@@ -651,6 +692,7 @@ namespace CS2MapCompiler
             this.onlyBaseTileMesh.Name = "onlyBaseTileMesh";
             this.onlyBaseTileMesh.Size = new System.Drawing.Size(163, 17);
             this.onlyBaseTileMesh.TabIndex = 54;
+            this.onlyBaseTileMesh.Tag = "labelOnlyBaseTileMesh";
             this.onlyBaseTileMesh.Text = "Only base tile mesh geometry";
             this.onlyBaseTileMesh.UseVisualStyleBackColor = true;
             // 
@@ -662,6 +704,7 @@ namespace CS2MapCompiler
             this.legacyCompileColMesh.Name = "legacyCompileColMesh";
             this.legacyCompileColMesh.Size = new System.Drawing.Size(171, 17);
             this.legacyCompileColMesh.TabIndex = 55;
+            this.legacyCompileColMesh.Tag = "labellegacyCompileColMesh";
             this.legacyCompileColMesh.Text = "Legacy Compile Collision Mesh";
             this.legacyCompileColMesh.UseVisualStyleBackColor = true;
             this.legacyCompileColMesh.Visible = false;
@@ -669,7 +712,7 @@ namespace CS2MapCompiler
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(9, 603);
+            this.label5.Location = new System.Drawing.Point(7, 565);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(76, 13);
             this.label5.TabIndex = 56;
@@ -678,18 +721,99 @@ namespace CS2MapCompiler
             // cmdLine
             // 
             this.cmdLine.AutoSize = true;
-            this.cmdLine.Location = new System.Drawing.Point(86, 603);
+            this.cmdLine.Location = new System.Drawing.Point(84, 565);
             this.cmdLine.MaximumSize = new System.Drawing.Size(450, 0);
             this.cmdLine.Name = "cmdLine";
             this.cmdLine.Size = new System.Drawing.Size(27, 13);
             this.cmdLine.TabIndex = 57;
             this.cmdLine.Text = "N/A";
             // 
+            // PresetFullBuild
+            // 
+            this.PresetFullBuild.Location = new System.Drawing.Point(464, 71);
+            this.PresetFullBuild.Name = "PresetFullBuild";
+            this.PresetFullBuild.Size = new System.Drawing.Size(63, 61);
+            this.PresetFullBuild.TabIndex = 58;
+            this.PresetFullBuild.Tag = "labelfullbuild";
+            this.PresetFullBuild.Text = "Full Compile";
+            this.PresetFullBuild.UseVisualStyleBackColor = true;
+            this.PresetFullBuild.Click += new System.EventHandler(this.PresetFullBuild_Click);
+            // 
+            // PresetFastBuild
+            // 
+            this.PresetFastBuild.Location = new System.Drawing.Point(464, 138);
+            this.PresetFastBuild.Name = "PresetFastBuild";
+            this.PresetFastBuild.Size = new System.Drawing.Size(63, 61);
+            this.PresetFastBuild.TabIndex = 59;
+            this.PresetFastBuild.Tag = "labelfastbuild";
+            this.PresetFastBuild.Text = "Fast Compile";
+            this.PresetFastBuild.UseVisualStyleBackColor = true;
+            this.PresetFastBuild.Click += new System.EventHandler(this.PresetFastBuild_Click);
+            // 
+            // PresetFinalBuild
+            // 
+            this.PresetFinalBuild.Location = new System.Drawing.Point(464, 205);
+            this.PresetFinalBuild.Name = "PresetFinalBuild";
+            this.PresetFinalBuild.Size = new System.Drawing.Size(63, 61);
+            this.PresetFinalBuild.TabIndex = 60;
+            this.PresetFinalBuild.Tag = "labelfinalbuild";
+            this.PresetFinalBuild.Text = "Final Compile";
+            this.PresetFinalBuild.UseVisualStyleBackColor = true;
+            this.PresetFinalBuild.Click += new System.EventHandler(this.PresetFinalBuild_Click);
+            // 
+            // PresetOnlyEntities
+            // 
+            this.PresetOnlyEntities.Location = new System.Drawing.Point(464, 272);
+            this.PresetOnlyEntities.Name = "PresetOnlyEntities";
+            this.PresetOnlyEntities.Size = new System.Drawing.Size(63, 61);
+            this.PresetOnlyEntities.TabIndex = 61;
+            this.PresetOnlyEntities.Tag = "labelentsonly";
+            this.PresetOnlyEntities.Text = "Only Entities";
+            this.PresetOnlyEntities.UseVisualStyleBackColor = true;
+            this.PresetOnlyEntities.Click += new System.EventHandler(this.PresetOnlyEntities_Click);
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(5, 667);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(32, 13);
+            this.label9.TabIndex = 62;
+            this.label9.Text = "Help:";
+            // 
+            // helpLabel
+            // 
+            this.helpLabel.AutoSize = true;
+            this.helpLabel.Location = new System.Drawing.Point(34, 667);
+            this.helpLabel.MaximumSize = new System.Drawing.Size(450, 0);
+            this.helpLabel.Name = "helpLabel";
+            this.helpLabel.Size = new System.Drawing.Size(27, 13);
+            this.helpLabel.TabIndex = 63;
+            this.helpLabel.Text = "N/A";
+            // 
+            // PresetCustom
+            // 
+            this.PresetCustom.Location = new System.Drawing.Point(464, 339);
+            this.PresetCustom.Name = "PresetCustom";
+            this.PresetCustom.Size = new System.Drawing.Size(63, 61);
+            this.PresetCustom.TabIndex = 64;
+            this.PresetCustom.Tag = "labelcustom";
+            this.PresetCustom.Text = "Custom";
+            this.PresetCustom.UseVisualStyleBackColor = true;
+            this.PresetCustom.Click += new System.EventHandler(this.PresetCustom_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(472, 666);
+            this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.PresetCustom);
+            this.Controls.Add(this.helpLabel);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.PresetOnlyEntities);
+            this.Controls.Add(this.PresetFinalBuild);
+            this.Controls.Add(this.PresetFastBuild);
+            this.Controls.Add(this.PresetFullBuild);
             this.Controls.Add(this.cmdLine);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.legacyCompileColMesh);
@@ -812,6 +936,13 @@ namespace CS2MapCompiler
         private System.Windows.Forms.CheckBox legacyCompileColMesh;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label cmdLine;
+        private System.Windows.Forms.Button PresetFullBuild;
+        private System.Windows.Forms.Button PresetFastBuild;
+        private System.Windows.Forms.Button PresetFinalBuild;
+        private System.Windows.Forms.Button PresetOnlyEntities;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label helpLabel;
+        private System.Windows.Forms.Button PresetCustom;
     }
 }
 
