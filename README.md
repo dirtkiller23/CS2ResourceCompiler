@@ -12,7 +12,6 @@ I think it's pretty self explanatory.
 2. Select the desired options.
 3. Click compile.
 
-![product-screenshot]
+![CS2MapCompiler_hYJ3nz1i80](https://github.com/user-attachments/assets/2978d807-db73-4173-be87-004cf90aa562)
 
 
-[product-screenshot]: CS2MapCompiler_nGfZXhVl9r.png
