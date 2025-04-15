@@ -94,6 +94,7 @@ namespace CS2MapCompiler
             this.label9 = new System.Windows.Forms.Label();
             this.helpLabel = new System.Windows.Forms.Label();
             this.PresetCustom = new System.Windows.Forms.Button();
+            this.vrad3LargeSize = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // timer1
@@ -802,11 +803,23 @@ namespace CS2MapCompiler
             this.PresetCustom.UseVisualStyleBackColor = true;
             this.PresetCustom.Click += new System.EventHandler(this.PresetCustom_Click);
             // 
+            // vrad3LargeSize
+            // 
+            this.vrad3LargeSize.AutoSize = true;
+            this.vrad3LargeSize.Location = new System.Drawing.Point(263, 237);
+            this.vrad3LargeSize.Name = "vrad3LargeSize";
+            this.vrad3LargeSize.Size = new System.Drawing.Size(142, 17);
+            this.vrad3LargeSize.TabIndex = 65;
+            this.vrad3LargeSize.Tag = "labellargesize";
+            this.vrad3LargeSize.Text = "VRAD3 Large block size";
+            this.vrad3LargeSize.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.vrad3LargeSize);
             this.Controls.Add(this.PresetCustom);
             this.Controls.Add(this.helpLabel);
             this.Controls.Add(this.label9);
@@ -943,6 +956,7 @@ namespace CS2MapCompiler
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label helpLabel;
         private System.Windows.Forms.Button PresetCustom;
+        private System.Windows.Forms.CheckBox vrad3LargeSize;
     }
 }
 

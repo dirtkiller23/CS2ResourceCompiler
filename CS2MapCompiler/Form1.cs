@@ -255,6 +255,10 @@ namespace CS2MapCompiler
                 {
                     args.Add("-write_debug_path_trace_scene_info");
                 }
+                if (vrad3LargeSize.Checked)
+                {
+                    args.Add("-vrad3LargeBlockSize");
+                }
                 args.Add("-lightmapLocalCompile");
             }
             else if (!genLightmaps.Checked)
@@ -348,6 +352,12 @@ namespace CS2MapCompiler
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(outputpath))
+            {
+                MessageBox.Show("No .vmap is specified.", "CS2 Map Compiler",
+                       MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             process = new Process();
             var task = new Task(() => ProcessThread());
             if (File.Exists(Path.Combine(outputpath, Path.GetFileNameWithoutExtension(mapname) + ".vpk")))
@@ -365,7 +375,7 @@ namespace CS2MapCompiler
             }
             else
             {
-                arg = ArgumentBuilder() + string.Format("\"{0}\"", outputpath);
+                arg = ArgumentBuilder() + string.Format("\"{0}\"", outputpath);             
                 task.Start();
             }
         }
@@ -442,6 +452,7 @@ namespace CS2MapCompiler
                 writeDebugPT.Enabled = false;
                 /*nolightmaps.Enabled = true;
                 nolightmaps.Visible = false;*/
+                vrad3LargeSize.Enabled = false;
             }
             else
             {
@@ -455,6 +466,7 @@ namespace CS2MapCompiler
                 noLightCalc.Enabled = true;
                 useDeterCharts.Enabled = true;
                 writeDebugPT.Enabled = true;
+                vrad3LargeSize.Enabled = true;
             }
         }
         void Checkers()
@@ -478,6 +490,7 @@ namespace CS2MapCompiler
             noLightCalc.CheckedChanged += OnSettingChanged;
             useDeterCharts.CheckedChanged += OnSettingChanged;
             writeDebugPT.CheckedChanged += OnSettingChanged;
+            vrad3LargeSize.CheckedChanged += OnSettingChanged;
             //Phys
             buildPhys.CheckedChanged += OnSettingChanged;
             legacyCompileColMesh.CheckedChanged += OnSettingChanged;
@@ -830,6 +843,7 @@ namespace CS2MapCompiler
             {"labelnoiseremoval", "Enable/Disable lightmap denoising."},
             {"labelnoLightCalc", "Disable lighting calculations (useful for debugging texel density/chart allocation)."},
             {"labeluseDeterCharts", "Use Deterministic lightmap charts during bake."},
+            {"labellargesize", "Make larger VRAD3 blocks."},
             {"labelwriteDebugPT", "Write debug Path Trace scene info into a file."},
             {"labelbuildPhys", "Build collision physics mesh."},
             {"labellegacyCompileColMesh", "Build legacy collision physics mesh."},
@@ -884,6 +898,7 @@ namespace CS2MapCompiler
             noLightCalc.MouseHover += Control_MouseEnter;
             useDeterCharts.MouseHover += Control_MouseEnter;
             writeDebugPT.MouseHover += Control_MouseEnter;
+            vrad3LargeSize.MouseHover += Control_MouseEnter;
             //Phys
             buildPhys.MouseHover += Control_MouseEnter;
             legacyCompileColMesh.MouseHover += Control_MouseEnter;
@@ -913,7 +928,6 @@ namespace CS2MapCompiler
             {
                 helpLabel.Text = helpText;
             }
-        }
-
+        }   
     }
 }
