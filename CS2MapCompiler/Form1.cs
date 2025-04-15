@@ -91,7 +91,7 @@ namespace CS2MapCompiler
         }
         void CS2Validator()
         {
-            string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "steamtours.exe", "dota2.exe", "deskjob.exe" };
+            string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "deadlock.exe", "hlx.exe", "hl3.exe", "steamtours.exe", "dota2.exe", "deskjob.exe", "vr.exe" };
             bool anyExecutableFound = false;
 
             foreach (string exe in requiredExecutables)
@@ -102,12 +102,13 @@ namespace CS2MapCompiler
                     cs2status.Text = $"Found {exe}";
                     cs2status.ForeColor = Color.Green;
                     button1.Enabled = true;
-                    if (exe != "cs2.exe" && exe != "project8.exe" && exe != "dota2.exe")
-                    {
+                    if (exe != "cs2.exe" && exe != "project8.exe" && exe != "deadlock.exe" && exe != "hl3.exe" && exe != "hlx.exe" && exe != "dota2.exe")
+                    { //the future stares back - todo add resourcecompiler parameters for future s2 versions/games
                         oldsource2pre2020 = true;
                     }
 
-                    if (oldsource2pre2020 == true) //if is not a S2 game post 2021, then disable post 2021 features like GPU VRAD3. 
+                    if (oldsource2pre2020 == true) //if its not a S2 game post 2021, then assume we are a s2 game pre 2021 and disable post 2021 features like GPU VRAD3.
+                                                   //todo add support for envmaps and nolight/old light from 2015-2016
                     {
                         cpu.Enabled = false;
                         cpu.Visible = false;
@@ -119,7 +120,16 @@ namespace CS2MapCompiler
                         AudioThreadsBox.Enabled = false;
                         AudioThreadsLabel.Visible = false;
                         AudioThreadsLabel.Enabled = false;
+                        vrad3LargeSize.Visible = false;
+                        vrad3LargeSize.Enabled = false;
                         cpuLabel.Text = "Only CPU lightmap is supported.";
+                    }
+
+                    if (exe == "deskjob.exe") //if deskjob - disable the lighting options by default as there is no vrad3
+                    {
+                        genLightmaps.Checked = false;
+                        noiseremoval.Checked = false;
+                        cpuLabel.Text = "No light is possible.";
                     }
 
                     if (exe != "dota2.exe")
