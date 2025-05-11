@@ -806,6 +806,8 @@ namespace CS2MapCompiler
             // vrad3LargeSize
             // 
             this.vrad3LargeSize.AutoSize = true;
+            this.vrad3LargeSize.Checked = true;
+            this.vrad3LargeSize.CheckState = System.Windows.Forms.CheckState.Checked;
             this.vrad3LargeSize.Location = new System.Drawing.Point(263, 237);
             this.vrad3LargeSize.Name = "vrad3LargeSize";
             this.vrad3LargeSize.Size = new System.Drawing.Size(142, 17);

@@ -652,6 +652,7 @@ namespace CS2MapCompiler
             nolightmaps.Checked = false;
             lightmapres.SelectedIndex = 3;
             lightmapquality.SelectedIndex = 1;
+            vrad3LargeSize.Checked = true;
             compression.Checked = true;
             noiseremoval.Checked = true;
             noLightCalc.Checked = false;
@@ -727,6 +728,7 @@ namespace CS2MapCompiler
             nolightmaps.Checked = false;
             lightmapres.SelectedIndex = 2;
             lightmapquality.SelectedIndex = 2;
+            vrad3LargeSize.Checked = true;
             compression.Checked = true;
             noiseremoval.Checked = true;
             noLightCalc.Checked = false;
@@ -802,6 +804,7 @@ namespace CS2MapCompiler
             nolightmaps.Checked = false;
             lightmapres.SelectedIndex = 3;
             lightmapquality.SelectedIndex = 1;
+            vrad3LargeSize.Checked = true;
             compression.Checked = true;
             noiseremoval.Checked = true;
             noLightCalc.Checked = false;
