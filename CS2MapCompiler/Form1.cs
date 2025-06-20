@@ -192,10 +192,16 @@ namespace CS2MapCompiler
 
         }
 
+        private bool IsTextFile(string path)
+        {
+            return Path.GetExtension(path)?.Equals(".txt", StringComparison.OrdinalIgnoreCase) == true;
+        }
+
         string ArgumentBuilder()
         {
             List<string> args = new List<string>();
-            string argument = $"-threads {threadcount.SelectedItem} -fshallow -maxtextureres 256 -dxlevel 110 -quiet -unbufferedio -i " + string.Format("\"{0}\"", mappath) + " -noassert ";
+            string inputFlag = IsTextFile(mappath) ? "-filelist" : "-i";
+            string argument = $"-threads {threadcount.SelectedItem} -fshallow -maxtextureres 256 -dxlevel 110 -quiet -unbufferedio {inputFlag} " + string.Format("\"{0}\"", mappath) + " -noassert ";
 
             if (buildworld.Checked)
             {
@@ -547,7 +553,7 @@ namespace CS2MapCompiler
                 }
             }
 
-            file.Filter = "Hammer Map File |*.vmap";
+            file.Filter = "Hammer Map File(*.vmap)|*.vmap;|Map List(*.txt)|*.txt;";
 
             if (file.ShowDialog() == DialogResult.OK)
             {
