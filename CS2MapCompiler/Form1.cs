@@ -91,7 +91,7 @@ namespace CS2MapCompiler
         }
         void CS2Validator()
         {
-            string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "deadlock.exe", "hlx.exe", "hl3.exe", "steamtours.exe", "dota2.exe", "deskjob.exe", "vr.exe" };
+            string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "deadlock.exe", "primelock.exe", "hlx.exe", "hl3.exe", "steamtours.exe", "dota2.exe", "deskjob.exe", "vr.exe" };
             bool anyExecutableFound = false;
 
             foreach (string exe in requiredExecutables)
@@ -102,7 +102,7 @@ namespace CS2MapCompiler
                     cs2status.Text = $"Found {exe}";
                     cs2status.ForeColor = Color.Green;
                     button1.Enabled = true;
-                    if (exe != "cs2.exe" && exe != "project8.exe" && exe != "deadlock.exe" && exe != "hl3.exe" && exe != "hlx.exe" && exe != "dota2.exe")
+                    if (exe != "cs2.exe" && exe != "project8.exe" && exe != "deadlock.exe" && exe != "hl3.exe" && exe != "hlx.exe" && exe != "dota2.exe" && exe != "primelock.exe")
                     { //the future stares back - todo add resourcecompiler parameters for future s2 versions/games
                         oldsource2pre2020 = true;
                     }
@@ -448,7 +448,7 @@ namespace CS2MapCompiler
         private void button3_Click(object sender, EventArgs e)
         {
             OpenFileDialog file = new OpenFileDialog();
-            file.Filter = "Executable Files (*.exe)|cs2.exe;hlvr.exe;project8.exe;steamtours.exe;deskjob.exe;dota2.exe";
+            file.Filter = "Executable Files (*.exe)|cs2.exe;hlvr.exe;project8.exe;deadlock.exe;primelock.exe;steamtours.exe;deskjob.exe;dota2.exe";
             if (file.ShowDialog() == DialogResult.OK)
             {
                 cs2dir = Path.GetDirectoryName(file.FileName);
