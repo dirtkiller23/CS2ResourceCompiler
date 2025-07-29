@@ -95,6 +95,7 @@ namespace CS2MapCompiler
             this.helpLabel = new System.Windows.Forms.Label();
             this.PresetCustom = new System.Windows.Forms.Button();
             this.vrad3LargeSize = new System.Windows.Forms.CheckBox();
+            this.builddynamicsurfaceeffects = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // timer1
@@ -816,11 +817,25 @@ namespace CS2MapCompiler
             this.vrad3LargeSize.Text = "VRAD3 Large block size";
             this.vrad3LargeSize.UseVisualStyleBackColor = true;
             // 
+            // builddynamicsurfaceeffects
+            // 
+            this.builddynamicsurfaceeffects.AutoSize = true;
+            this.builddynamicsurfaceeffects.Checked = true;
+            this.builddynamicsurfaceeffects.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.builddynamicsurfaceeffects.Location = new System.Drawing.Point(165, 105);
+            this.builddynamicsurfaceeffects.Name = "builddynamicsurfaceeffects";
+            this.builddynamicsurfaceeffects.Size = new System.Drawing.Size(200, 17);
+            this.builddynamicsurfaceeffects.TabIndex = 66;
+            this.builddynamicsurfaceeffects.Tag = "labelDynamicSurfaceEffects";
+            this.builddynamicsurfaceeffects.Text = "Build World Dynamic Surface Effects";
+            this.builddynamicsurfaceeffects.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.builddynamicsurfaceeffects);
             this.Controls.Add(this.vrad3LargeSize);
             this.Controls.Add(this.PresetCustom);
             this.Controls.Add(this.helpLabel);
@@ -959,6 +974,7 @@ namespace CS2MapCompiler
         private System.Windows.Forms.Label helpLabel;
         private System.Windows.Forms.Button PresetCustom;
         private System.Windows.Forms.CheckBox vrad3LargeSize;
+        private System.Windows.Forms.CheckBox builddynamicsurfaceeffects;
     }
 }
 

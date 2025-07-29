@@ -208,6 +208,10 @@ namespace CS2MapCompiler
                 args.Add("-world");
                 args.Remove("-entities");
             }
+            if (!builddynamicsurfaceeffects.Checked)
+            {
+                args.Add("-skipauxfiles");
+            }
             if (entsOnly.Checked)
             {
                 args.Add("-entities");
@@ -495,6 +499,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.CheckedChanged += OnSettingChanged;
             threadcount.SelectedIndexChanged += OnSettingChanged;
             button3.Click += OnSettingChanged;
+            builddynamicsurfaceeffects.CheckedChanged += OnSettingChanged;
             //Baked Lighting
             genLightmaps.CheckedChanged += OnSettingChanged;
             cpu.CheckedChanged += OnSettingChanged;
@@ -651,6 +656,7 @@ namespace CS2MapCompiler
             settlephys.Checked = true;
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
+            builddynamicsurfaceeffects.Checked = true;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -694,6 +700,7 @@ namespace CS2MapCompiler
             settlephys.Checked = true;
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
+            builddynamicsurfaceeffects.Checked = true;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -727,6 +734,7 @@ namespace CS2MapCompiler
             settlephys.Checked = true;
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
+            builddynamicsurfaceeffects.Checked = true;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -770,6 +778,7 @@ namespace CS2MapCompiler
             settlephys.Checked = true;
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
+            builddynamicsurfaceeffects.Checked = true;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -803,6 +812,7 @@ namespace CS2MapCompiler
             settlephys.Checked = true;
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
+            builddynamicsurfaceeffects.Checked = true;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -853,6 +863,7 @@ namespace CS2MapCompiler
             {"labelSettlePhys", "Pre-Settle physics objects."},
             {"labelDebugVisGeo", "Debug VIS Geometry."},
             {"labelOnlyBaseTileMesh", "Only base Tile Mesh geometry."},
+            {"labelDynamicSurfaceEffects", "Build world dynamic surface effects. Unknown."},
             {"labelgenLightmaps", "Bake lightmaps. GPU with RT support required."},
             {"labellightmapres", "Lightmap resolution. 1024 - Standard, 2048 - Final, 8192 - Shipping / Final."},
             {"labellightmapquality", "Lightmap quality."},
@@ -862,7 +873,7 @@ namespace CS2MapCompiler
             {"labelnoiseremoval", "Enable/Disable lightmap denoising."},
             {"labelnoLightCalc", "Disable lighting calculations (useful for debugging texel density/chart allocation)."},
             {"labeluseDeterCharts", "Use Deterministic lightmap charts during bake."},
-            {"labellargesize", "Make larger VRAD3 blocks."},
+            {"labellargesize", "Make larger VRAD3 blocks at the cost of higher VRAM usage."},
             {"labelwriteDebugPT", "Write debug Path Trace scene info into a file."},
             {"labelbuildPhys", "Build collision physics mesh."},
             {"labellegacyCompileColMesh", "Build legacy collision physics mesh."},
@@ -906,6 +917,7 @@ namespace CS2MapCompiler
             settlephys.MouseHover += Control_MouseEnter;
             debugVisGeo.MouseHover += Control_MouseEnter;
             onlyBaseTileMesh.MouseHover += Control_MouseEnter;
+            builddynamicsurfaceeffects.MouseHover += Control_MouseEnter;
             //Baked Lighting
             genLightmaps.MouseHover += Control_MouseEnter;         
             cpu.MouseHover += Control_MouseEnter;
