@@ -96,6 +96,8 @@ namespace CS2MapCompiler
             this.PresetCustom = new System.Windows.Forms.Button();
             this.vrad3LargeSize = new System.Windows.Forms.CheckBox();
             this.builddynamicsurfaceeffects = new System.Windows.Forms.CheckBox();
+            this.statusLabelText = new System.Windows.Forms.Label();
+            this.statusLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // timer1
@@ -830,11 +832,35 @@ namespace CS2MapCompiler
             this.builddynamicsurfaceeffects.Text = "Build World Dynamic Surface Effects";
             this.builddynamicsurfaceeffects.UseVisualStyleBackColor = true;
             // 
+            // statusLabelText
+            // 
+            this.statusLabelText.AutoSize = true;
+            this.statusLabelText.Location = new System.Drawing.Point(119, 38);
+            this.statusLabelText.Name = "statusLabelText";
+            this.statusLabelText.Size = new System.Drawing.Size(37, 13);
+            this.statusLabelText.TabIndex = 67;
+            this.statusLabelText.Text = "Status";
+            this.statusLabelText.Visible = false;
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.ForeColor = System.Drawing.Color.Green;
+            this.statusLabel.Location = new System.Drawing.Point(162, 38);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(38, 13);
+            this.statusLabel.TabIndex = 68;
+            this.statusLabel.Tag = "labelcompilestatus";
+            this.statusLabel.Text = "Ready";
+            this.statusLabel.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.statusLabel);
+            this.Controls.Add(this.statusLabelText);
             this.Controls.Add(this.builddynamicsurfaceeffects);
             this.Controls.Add(this.vrad3LargeSize);
             this.Controls.Add(this.PresetCustom);
@@ -975,6 +1001,8 @@ namespace CS2MapCompiler
         private System.Windows.Forms.Button PresetCustom;
         private System.Windows.Forms.CheckBox vrad3LargeSize;
         private System.Windows.Forms.CheckBox builddynamicsurfaceeffects;
+        private System.Windows.Forms.Label statusLabelText;
+        private System.Windows.Forms.Label statusLabel;
     }
 }
 

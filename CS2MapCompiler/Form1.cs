@@ -87,7 +87,7 @@ namespace CS2MapCompiler
                 AudioThreadsBox.Items.Add(i);
             }
             AudioThreadsBox.SelectedIndex = cpuCount - 1;
-            threadcount.SelectedIndex = cpuCount - 1;
+            threadcount.SelectedIndex = cpuCount - 1;            
         }
         void CS2Validator()
         {
@@ -197,6 +197,11 @@ namespace CS2MapCompiler
             return Path.GetExtension(path)?.Equals(".txt", StringComparison.OrdinalIgnoreCase) == true;
         }
 
+        private bool IsCompiling()
+        {
+            return process != null && !process.HasExited;
+        }
+        
         string ArgumentBuilder()
         {
             List<string> args = new List<string>();
@@ -372,14 +377,25 @@ namespace CS2MapCompiler
 
         private void button1_Click(object sender, EventArgs e)
         {
+            if (IsCompiling())
+            {
+                MessageBox.Show("A compilation is already in progress. Please wait for it to complete or cancel it first.",
+                               "CS2 Map Compiler",
+                               MessageBoxButtons.OK,
+                               MessageBoxIcon.Warning);
+                return;
+            }
             if (string.IsNullOrEmpty(outputpath))
             {
                 MessageBox.Show("No .vmap is specified.", "CS2 Map Compiler",
                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
+            button1.Enabled = false;
+            
             process = new Process();
             var task = new Task(() => ProcessThread());
+
             if (File.Exists(Path.Combine(outputpath, Path.GetFileNameWithoutExtension(mapname) + ".vpk")))
             {
                 var response = MessageBox.Show("Do you want to overwrite the existing map file?", "CS2 Map Compiler", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -391,6 +407,7 @@ namespace CS2MapCompiler
                 else
                 {
                     MessageBox.Show("Compile Cancelled!", "CS2 Map Compiler", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    button1.Enabled = true;                 
                 }
             }
             else
@@ -402,33 +419,45 @@ namespace CS2MapCompiler
 
         private void ProcessThread()
         {
+            try
+            {
+                process.StartInfo.FileName = resourcecompiler;
+                process.StartInfo.Arguments = arg;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.RedirectStandardError = true;
 
-            process.StartInfo.FileName = resourcecompiler;
-            process.StartInfo.Arguments = arg;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardError = true;
+                //* Set ONLY ONE handler here.
 
-            //* Set ONLY ONE handler here.
+                //* Start process
 
-            //* Start process
+                process.Start();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler + " " + arg + "\nTime: " + DateTime.Now + "\n");
+                Console.ForegroundColor = ConsoleColor.White;
+                //* Read one element asynchronously
+                //* Read the other one synchronously
 
-            process.Start();
+                output = process.StandardError.ReadToEnd();
+                Console.WriteLine(output);
+
+                process.WaitForExit();
+            }
+            finally
+            {
+                this.Invoke((MethodInvoker)delegate {
+                    button1.Enabled = true;
+                    
+                });
+            }
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler + " " + arg + "\nTime: " + DateTime.Now + "\n");
+            Console.WriteLine("(CS2MapCompiler) Compile completed! - " + DateTime.Now + "\n");
             Console.ForegroundColor = ConsoleColor.White;
-            //* Read one element asynchronously
-            //* Read the other one synchronously
-
-            output = process.StandardError.ReadToEnd();
-            Console.WriteLine(output);
-
-            process.WaitForExit();
 
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            if (!process.HasExited)
+            if (IsCompiling())
             {
                 process.Kill();
                 process.WaitForExit();
@@ -436,6 +465,7 @@ namespace CS2MapCompiler
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("(CS2MapCompiler) Compile cancelled! - " + DateTime.Now + "\n");
                 Console.ForegroundColor = ConsoleColor.White;
+                button1.Enabled = true;               
             }
             else
             {
@@ -893,6 +923,7 @@ namespace CS2MapCompiler
             {"labelfinalbuild", "Build everything, including final quality lighting"},
             {"labelentsonly", "Build Entities. Nothing else!"},
             {"labelcustom", "Custom"},
+            //{"labelcompilestatus", "Compilation status."},
         };
 
         void HelpSystemEventReg()
@@ -906,6 +937,7 @@ namespace CS2MapCompiler
             button5.MouseHover += Control_MouseEnter;
             cs2status.MouseHover += Control_MouseEnter;
             wststatus.MouseHover += Control_MouseEnter;
+            //statusLabel.MouseHover += Control_MouseEnter;
             PresetFullBuild.MouseHover += Control_MouseEnter;
             PresetFastBuild.MouseHover += Control_MouseEnter;
             PresetFinalBuild.MouseHover += Control_MouseEnter;
