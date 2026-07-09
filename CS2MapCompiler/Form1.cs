@@ -217,6 +217,10 @@ namespace CS2MapCompiler
             {
                 args.Add("-skipauxfiles");
             }
+            if (buildDeformables.Checked)
+            {
+                args.Add("-deformables forced");
+            }
             if (entsOnly.Checked)
             {
                 args.Add("-entities");
@@ -358,6 +362,10 @@ namespace CS2MapCompiler
             {
                 args.Add("-condebug");
                 args.Add("-consolelog");
+            }
+            if (dangerMode.Checked)
+            {
+                args.Add("-danger_mode_ignore_schema_mismatches");
             }
             args.Add("-retail -breakpad -nop4 -outroot ");
             if (oldsource2pre2020 == true)
@@ -530,6 +538,7 @@ namespace CS2MapCompiler
             threadcount.SelectedIndexChanged += OnSettingChanged;
             button3.Click += OnSettingChanged;
             builddynamicsurfaceeffects.CheckedChanged += OnSettingChanged;
+            buildDeformables.CheckedChanged += OnSettingChanged;
             //Baked Lighting
             genLightmaps.CheckedChanged += OnSettingChanged;
             cpu.CheckedChanged += OnSettingChanged;
@@ -560,6 +569,7 @@ namespace CS2MapCompiler
             vconPrint.CheckedChanged += OnSettingChanged;
             vprofPrint.CheckedChanged += OnSettingChanged;
             logPrint.CheckedChanged += OnSettingChanged;
+            dangerMode.CheckedChanged += OnSettingChanged;
         }
         private void OnSettingChanged(object sender, EventArgs e)
         {
@@ -687,6 +697,7 @@ namespace CS2MapCompiler
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
+            buildDeformables.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -719,7 +730,8 @@ namespace CS2MapCompiler
             //Extra
             vconPrint.Checked = false;
             vprofPrint.Checked = false;
-            logPrint.Checked = false;         
+            logPrint.Checked = false;
+            dangerMode.Checked = false;
         }
 
         private void PresetFastBuild_Click(object sender, EventArgs e)
@@ -731,6 +743,7 @@ namespace CS2MapCompiler
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
+            buildDeformables.Checked = false;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -753,7 +766,8 @@ namespace CS2MapCompiler
             //Extra
             vconPrint.Checked = false;
             vprofPrint.Checked = false;
-            logPrint.Checked = false;         
+            logPrint.Checked = false;
+            dangerMode.Checked = false;
         }
 
         private void PresetFinalBuild_Click(object sender, EventArgs e)
@@ -765,6 +779,7 @@ namespace CS2MapCompiler
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
+            buildDeformables.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -793,11 +808,12 @@ namespace CS2MapCompiler
             //Steam Audio
             saReverb.Checked = true;
             baPaths.Checked = true;
-            bakeCustom.Checked = false; //yet
+            bakeCustom.Checked = false;
             //Extra
             vconPrint.Checked = false;
             vprofPrint.Checked = false;
-            logPrint.Checked = false;            
+            logPrint.Checked = false;
+            dangerMode.Checked = false;
         }
 
         private void PresetOnlyEntities_Click(object sender, EventArgs e)
@@ -809,6 +825,7 @@ namespace CS2MapCompiler
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
+            buildDeformables.Checked = false;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -831,7 +848,8 @@ namespace CS2MapCompiler
             //Extra
             vconPrint.Checked = false;
             vprofPrint.Checked = false;
-            logPrint.Checked = false;            
+            logPrint.Checked = false;
+            dangerMode.Checked = false;
         }
 
         private void PresetCustom_Click(object sender, EventArgs e)
@@ -843,6 +861,7 @@ namespace CS2MapCompiler
             debugVisGeo.Checked = false;
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
+            buildDeformables.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -871,11 +890,12 @@ namespace CS2MapCompiler
             //Steam Audio
             saReverb.Checked = true;
             baPaths.Checked = true;
-            bakeCustom.Checked = false; //yet
+            bakeCustom.Checked = false;
             //Extra
             vconPrint.Checked = true;
             vprofPrint.Checked = true;
-            logPrint.Checked = true;          
+            logPrint.Checked = true;
+            dangerMode.Checked = false;
         }
 
         private Dictionary<string, string> _helpText = new Dictionary<string, string>
@@ -894,6 +914,7 @@ namespace CS2MapCompiler
             {"labelDebugVisGeo", "Debug VIS Geometry."},
             {"labelOnlyBaseTileMesh", "Only base Tile Mesh geometry."},
             {"labelDynamicSurfaceEffects", "Build world dynamic surface effects. Unknown."},
+            {"labelDeformable", "Build deformable geometry. Unknown."},
             {"labelgenLightmaps", "Bake lightmaps. GPU with RT support required."},
             {"labellightmapres", "Lightmap resolution. 1024 - Standard, 2048 - Final, 8192 - Shipping / Final."},
             {"labellightmapquality", "Lightmap quality."},
@@ -923,6 +944,7 @@ namespace CS2MapCompiler
             {"labelfinalbuild", "Build everything, including final quality lighting"},
             {"labelentsonly", "Build Entities. Nothing else!"},
             {"labelcustom", "Custom"},
+            {"labeldangerMode", "Ignore Schema mismatches."},
             //{"labelcompilestatus", "Compilation status."},
         };
 
@@ -950,6 +972,7 @@ namespace CS2MapCompiler
             debugVisGeo.MouseHover += Control_MouseEnter;
             onlyBaseTileMesh.MouseHover += Control_MouseEnter;
             builddynamicsurfaceeffects.MouseHover += Control_MouseEnter;
+            buildDeformables.MouseHover += Control_MouseEnter;
             //Baked Lighting
             genLightmaps.MouseHover += Control_MouseEnter;         
             cpu.MouseHover += Control_MouseEnter;
@@ -981,6 +1004,7 @@ namespace CS2MapCompiler
             vconPrint.MouseHover += Control_MouseEnter;
             vprofPrint.MouseHover += Control_MouseEnter;
             logPrint.MouseHover += Control_MouseEnter;
+            dangerMode.MouseHover += Control_MouseEnter;
         }
 
         private void Control_MouseEnter(object sender, EventArgs e)

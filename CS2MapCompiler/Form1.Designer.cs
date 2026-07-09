@@ -98,6 +98,8 @@ namespace CS2MapCompiler
             this.builddynamicsurfaceeffects = new System.Windows.Forms.CheckBox();
             this.statusLabelText = new System.Windows.Forms.Label();
             this.statusLabel = new System.Windows.Forms.Label();
+            this.dangerMode = new System.Windows.Forms.CheckBox();
+            this.buildDeformables = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // timer1
@@ -485,7 +487,7 @@ namespace CS2MapCompiler
             this.CategoryLight.AutoSize = true;
             this.CategoryLight.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryLight.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryLight.Location = new System.Drawing.Point(181, 135);
+            this.CategoryLight.Location = new System.Drawing.Point(220, 138);
             this.CategoryLight.Name = "CategoryLight";
             this.CategoryLight.Size = new System.Drawing.Size(78, 13);
             this.CategoryLight.TabIndex = 35;
@@ -854,11 +856,35 @@ namespace CS2MapCompiler
             this.statusLabel.Text = "Ready";
             this.statusLabel.Visible = false;
             // 
+            // dangerMode
+            // 
+            this.dangerMode.AutoSize = true;
+            this.dangerMode.Location = new System.Drawing.Point(68, 477);
+            this.dangerMode.Name = "dangerMode";
+            this.dangerMode.Size = new System.Drawing.Size(154, 17);
+            this.dangerMode.TabIndex = 69;
+            this.dangerMode.Tag = "labeldangerMode";
+            this.dangerMode.Text = "Ignore schema mismatches";
+            this.dangerMode.UseVisualStyleBackColor = true;
+            // 
+            // buildDeformables
+            // 
+            this.buildDeformables.AutoSize = true;
+            this.buildDeformables.Location = new System.Drawing.Point(12, 128);
+            this.buildDeformables.Name = "buildDeformables";
+            this.buildDeformables.Size = new System.Drawing.Size(154, 17);
+            this.buildDeformables.TabIndex = 70;
+            this.buildDeformables.Tag = "labelDeformable";
+            this.buildDeformables.Text = "Build Deformable Geometry";
+            this.buildDeformables.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.buildDeformables);
+            this.Controls.Add(this.dangerMode);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.statusLabelText);
             this.Controls.Add(this.builddynamicsurfaceeffects);
@@ -1003,6 +1029,8 @@ namespace CS2MapCompiler
         private System.Windows.Forms.CheckBox builddynamicsurfaceeffects;
         private System.Windows.Forms.Label statusLabelText;
         private System.Windows.Forms.Label statusLabel;
+        private System.Windows.Forms.CheckBox dangerMode;
+        private System.Windows.Forms.CheckBox buildDeformables;
     }
 }
 
