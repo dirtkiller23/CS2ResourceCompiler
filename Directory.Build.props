@@ -1,0 +1,31 @@
+<Project>
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+    <NeutralLanguage>en</NeutralLanguage>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <TreatWarningsAsErrors Condition="'$(Configuration)' == 'Release'">true</TreatWarningsAsErrors>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+    <AnalysisMode Condition="'$(Configuration)' == 'Release'">All</AnalysisMode>
+    <AnalysisMode Condition="'$(Configuration)' != 'Release'">Recommended</AnalysisMode>
+    <Nullable>enable</Nullable>
+
+    <!-- the one place the version lives -->
+    <Version>2.0.0</Version>
+
+    <RepositoryUrl>https://github.com/dirtkiller23/CS2ResourceCompiler</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' != 'Release'">
+    <!-- CA2000 is very slow: https://github.com/dotnet/roslyn-analyzers/issues/4915 -->
+    <NoWarn>$(NoWarn);CA2000</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System" />
+    <Using Include="System.Collections.Generic" />
+  </ItemGroup>
+</Project>

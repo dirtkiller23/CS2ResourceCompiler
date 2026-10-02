@@ -1,0 +1,406 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="using:CS2MapCompiler"
+        mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="900"
+        x:Class="CS2MapCompiler.MainWindow"
+        Title="CS2 Map Compiler"
+        Icon="avares://CS2MapCompiler/assets/icon.ico"
+        Width="1280" Height="900"
+        MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource AppBrush}"
+        local:WindowAccent.Color="{DynamicResource AccentColor}">
+    <Window.Resources>
+        <!-- the status pills: a tint of the accent for what was found, of red for what was not -->
+        <SolidColorBrush x:Key="FoundPillBrush" Color="{DynamicResource AccentColor}" Opacity="0.45" />
+        <SolidColorBrush x:Key="MissingPillBrush" Color="{DynamicResource DangerAccentColor}" Opacity="0.35" />
+        <SolidColorBrush x:Key="ErrorTextBrush" Color="{DynamicResource DangerAccentColor}" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- toolbar buttons: icon over label, like the workshop manager's -->
+        <Style Selector=":is(Button).tool">
+            <Setter Property="Padding" Value="6,3" />
+            <Setter Property="MinWidth" Value="52" />
+            <Setter Property="Background" Value="{DynamicResource ShadeBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
+        </Style>
+        <Style Selector=":is(Button).tool:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BorderSoftBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderSoftBrush}" />
+        </Style>
+        <Style Selector=":is(Button).tool:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <!-- a tool that can not be used now is faded, icon and all -->
+        <Style Selector=":is(Button).tool:disabled">
+            <Setter Property="Opacity" Value="0.4" />
+        </Style>
+        <Style Selector=":is(Button).tool StackPanel">
+            <Setter Property="Spacing" Value="4" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style Selector=":is(Button).tool Image">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+        </Style>
+        <Style Selector=":is(Button).tool TextBlock">
+            <Setter Property="FontSize" Value="11" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}" />
+        </Style>
+        <Style Selector=":is(Button).tool:pressed TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+        </Style>
+
+        <!-- the option groups: panels that shade the gradient, like the workshop manager's -->
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{DynamicResource ShadeBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="5" />
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
+        <Style Selector="TextBlock.heading">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="TextBlock.label">
+            <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}" />
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="TextBlock.note">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+        </Style>
+        <Style Selector="SelectableTextBlock.value">
+            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="Border.card CheckBox">
+            <Setter Property="MinHeight" Value="28" />
+        </Style>
+        <Style Selector="Border.card ComboBox">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0,2" />
+        </Style>
+        <!-- thread counts: whole numbers from one up to the threads there are, clamped back into that range -->
+        <Style Selector="NumericUpDown.threads">
+            <Setter Property="Minimum" Value="1" />
+            <Setter Property="Increment" Value="1" />
+            <Setter Property="FormatString" Value="0" />
+            <Setter Property="ParsingNumberStyle" Value="Integer" />
+            <Setter Property="ClipValueToMinMax" Value="True" />
+            <Setter Property="Margin" Value="0,2" />
+        </Style>
+        <!-- Fluent puts the arrows side by side as two wide buttons, here they are small and stacked like a classic spin box -->
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ StackPanel#PART_SpinnerPanel">
+            <Setter Property="Orientation" Value="Vertical" />
+        </Style>
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ RepeatButton">
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Width" Value="22" />
+            <Setter Property="Height" Value="15" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+        </Style>
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ RepeatButton PathIcon">
+            <Setter Property="Width" Value="8" />
+            <Setter Property="Height" Value="4" />
+        </Style>
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ RepeatButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+        </Style>
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ RepeatButton:pressed /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+        </Style>
+        <!-- an arrow that can not step further, at the minimum or the maximum, keeps its face and stays plainly visible -->
+        <Style Selector="NumericUpDown.threads /template/ ButtonSpinner /template/ RepeatButton:disabled /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
+        </Style>
+        <Style Selector="Button.preset">
+            <Setter Property="Margin" Value="0,0,6,6" />
+            <Setter Property="MinWidth" Value="100" />
+        </Style>
+
+        <!-- pills: whether the game and its tools were found -->
+        <Style Selector="Border.pill">
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector="Border.pill TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}" />
+        </Style>
+        <Style Selector="Border.pill.found">
+            <Setter Property="Background" Value="{DynamicResource FoundPillBrush}" />
+        </Style>
+        <Style Selector="Border.pill.missing">
+            <Setter Property="Background" Value="{DynamicResource MissingPillBrush}" />
+        </Style>
+
+        <!-- the compile log: tight monospaced lines, coloured by what they report -->
+        <Style Selector="ListBox#logList ListBoxItem">
+            <Setter Property="Padding" Value="8,0" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="ListBox#logList ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+        </Style>
+        <Style Selector="ListBox#logList ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
+        </Style>
+        <Style Selector="TextBlock.log">
+            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,Menlo,monospace" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
+        </Style>
+        <Style Selector="TextBlock.log.warning">
+            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
+        </Style>
+        <Style Selector="TextBlock.log.error">
+            <Setter Property="Foreground" Value="{DynamicResource ErrorTextBrush}" />
+        </Style>
+        <Style Selector="TextBlock.log.app">
+            <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <Panel>
+        <!-- window background: a subtle glow of the accent fading to the main colour, dithered so it does not band -->
+        <local:DitheredGradient CenterColor="{DynamicResource AppAccentColor}" EdgeColor="{DynamicResource AppColor}" GradientOrigin="90%,0%" />
+
+        <DockPanel>
+            <!-- how the compile is going -->
+            <TextBlock Name="statusLabel" DockPanel.Dock="Bottom" Margin="12,4,12,8" Text="Ready" Foreground="{DynamicResource ContrastBrush}" />
+
+            <!-- the compile's actions, whether the game and tools are there, and the settings -->
+            <Grid DockPanel.Dock="Top" Margin="8,6" ColumnDefinitions="Auto,*,Auto,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                    <Button Name="button4" Classes="tool" Tag="labelopenvmap" Click="button4_Click">
+                        <StackPanel>
+                            <Image Source="avares://CS2MapCompiler/assets/buttons/open.png" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            <TextBlock Text="Open .vmap" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="button5" Classes="tool" Tag="labeloverrideoutput" IsEnabled="False" Click="button5_Click">
+                        <StackPanel>
+                            <Image Source="avares://CS2MapCompiler/assets/buttons/output.png" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            <TextBlock Text="Change Output" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="button1" Classes="tool" Tag="labelCompile" Click="button1_Click">
+                        <StackPanel>
+                            <Image Source="avares://CS2MapCompiler/assets/buttons/compile.png" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            <TextBlock Text="Compile" />
+                        </StackPanel>
+                    </Button>
+                    <Button Name="button2" Classes="tool" Tag="labelCancel" Click="button2_Click">
+                        <StackPanel>
+                            <Image Source="avares://CS2MapCompiler/assets/buttons/cancel.png" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                            <TextBlock Text="Cancel" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="12,0" VerticalAlignment="Center">
+                    <TextBlock Text="Game" VerticalAlignment="Center" Foreground="{DynamicResource ContrastSoftBrush}" />
+                    <Border Name="cs2statusPill" Classes="pill missing">
+                        <TextBlock Name="cs2status" Tag="labelgamestatus" Text="Not Found" />
+                    </Border>
+                    <TextBlock Text="Tools" Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource ContrastSoftBrush}" />
+                    <Border Name="wststatusPill" Classes="pill missing">
+                        <TextBlock Name="wststatus" Tag="labeltoolstatus" Text="Not Found" />
+                    </Border>
+                </StackPanel>
+
+                <Button Grid.Column="3" Classes="tool" Click="OnSettings">
+                    <StackPanel>
+                        <Image Source="avares://CS2MapCompiler/assets/buttons/settings.png" RenderOptions.BitmapInterpolationMode="HighQuality" />
+                        <TextBlock Text="Settings" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <Grid Margin="8,0" ColumnDefinitions="620,8,*">
+                <!-- the options, in Hammer's groups -->
+                <ScrollViewer>
+                    <StackPanel Spacing="8" Margin="0,0,14,8">
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Classes="heading" Text="Presets" Margin="0,0,0,8" />
+                                <WrapPanel>
+                                    <Button Name="PresetFullBuild" Classes="preset" Tag="labelfullbuild" Content="Full Compile" Click="PresetFullBuild_Click" />
+                                    <Button Name="PresetFastBuild" Classes="preset" Tag="labelfastbuild" Content="Fast Compile" Click="PresetFastBuild_Click" />
+                                    <Button Name="PresetFinalBuild" Classes="preset" Tag="labelfinalbuild" Content="Final Compile" Click="PresetFinalBuild_Click" />
+                                    <Button Name="PresetOnlyEntities" Classes="preset" Tag="labelentsonly" Content="Only Entities" Click="PresetOnlyEntities_Click" />
+                                    <Button Name="PresetCustom" Classes="preset" Tag="labelcustom" Content="Custom" Click="PresetCustom_Click" />
+                                </WrapPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,8,*">
+                            <StackPanel Spacing="8">
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="World" />
+                                        <CheckBox Name="buildworld" Tag="labelBuildWorld" Content="Build World" IsChecked="True" />
+                                        <CheckBox Name="entsOnly" Tag="labelEntsOnly" Content="Entities Only" />
+                                        <CheckBox Name="settlephys" Tag="labelSettlePhys" Content="Pre-Settle physics objects" IsChecked="True" />
+                                        <CheckBox Name="debugVisGeo" Tag="labelDebugVisGeo" Content="Debug Vis Geometry" />
+                                        <CheckBox Name="onlyBaseTileMesh" Tag="labelOnlyBaseTileMesh" Content="Only base tile mesh geometry" />
+                                        <CheckBox Name="builddynamicsurfaceeffects" Tag="labelDynamicSurfaceEffects" Content="Build World Dynamic Surface Effects" IsChecked="True" />
+                                        <CheckBox Name="buildDeformables" Tag="labelDeformable" Content="Build Deformable Geometry" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="Physics" />
+                                        <CheckBox Name="buildPhys" Tag="labelbuildPhys" Content="Build physics" IsChecked="True" />
+                                        <CheckBox Name="legacyCompileColMesh" Tag="labellegacyCompileColMesh" Content="Legacy Compile Collision Mesh" IsEnabled="False" IsVisible="False" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="Visibility" />
+                                        <CheckBox Name="buildVis" Tag="labelbuildVis" Content="Build vis" IsChecked="True" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="Nav" />
+                                        <CheckBox Name="buildNav" Tag="labelbuildNav" Content="Build Nav" IsChecked="True" />
+                                        <CheckBox Name="gridNav" Tag="labelgridNav" Content="Build Grid Nav" />
+                                        <CheckBox Name="navDbg" Tag="labelnavDbg" Content="Save debug stages to file" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Spacing="8">
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="Baked Lighting" />
+                                        <TextBlock Name="cpuLabel" Classes="note" Text="Use CPU if you don't have a RT-capable GPU. Now broken!" />
+                                        <CheckBox Name="genLightmaps" Tag="labelgenLightmaps" Content="Generate Lightmaps" IsChecked="True" />
+                                        <CheckBox Name="cpu" Tag="labelCPUcompile" Content="Use CPU" />
+                                        <CheckBox Name="nolightmaps" Content="No Lightmaps" IsEnabled="False" IsVisible="False" />
+                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,4">
+                                            <TextBlock Classes="label" Text="Resolution:" />
+                                            <ComboBox Name="lightmapres" Grid.Column="1" Tag="labellightmapres">
+                                                <x:String>8192</x:String>
+                                                <x:String>4096</x:String>
+                                                <x:String>2048</x:String>
+                                                <x:String>1024</x:String>
+                                                <x:String>512</x:String>
+                                            </ComboBox>
+                                            <TextBlock Grid.Row="1" Classes="label" Text="Quality:" />
+                                            <ComboBox Name="lightmapquality" Grid.Row="1" Grid.Column="1" Tag="labellightmapquality">
+                                                <x:String>Fast</x:String>
+                                                <x:String>Standard</x:String>
+                                                <x:String>Final</x:String>
+                                            </ComboBox>
+                                        </Grid>
+                                        <CheckBox Name="compression" Tag="labelCompression" Content="Compression" IsChecked="True" />
+                                        <CheckBox Name="noiseremoval" Tag="labelnoiseremoval" Content="Noise Removal" IsChecked="True" />
+                                        <CheckBox Name="noLightCalc" Tag="labelnoLightCalc" Content="Disable lighting calculations" />
+                                        <CheckBox Name="useDeterCharts" Tag="labeluseDeterCharts" Content="Deterministic charting computations" />
+                                        <CheckBox Name="writeDebugPT" Tag="labelwriteDebugPT" Content="Write Debug Path Trace Info" />
+                                        <CheckBox Name="vrad3LargeSize" Tag="labellargesize" Content="VRAD3 Large block size" IsChecked="True" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Classes="card">
+                                    <StackPanel>
+                                        <TextBlock Classes="heading" Text="Steam Audio" />
+                                        <CheckBox Name="saReverb" Tag="labelsaReverb" Content="Bake reverb" IsChecked="True" />
+                                        <CheckBox Name="baPaths" Tag="labelsaPaths" Content="Bake paths" IsChecked="True" />
+                                        <CheckBox Name="bakeCustom" Tag="labelbakeCustom" Content="Bake Custom Data" />
+                                        <Grid ColumnDefinitions="Auto,*" Margin="0,4,0,0">
+                                            <TextBlock Name="AudioThreadsLabel" Classes="label" Tag="labelsaThreads" Text="Audio Threads:" />
+                                            <NumericUpDown Name="AudioThreadsBox" Grid.Column="1" Classes="threads" Tag="labelsaThreads" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <Border Classes="card">
+                            <StackPanel>
+                                <TextBlock Classes="heading" Text="Extra" />
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
+                                    <CheckBox Name="vconPrint" Tag="labelvconPrint" Content="Print to VConsole" />
+                                    <CheckBox Name="vprofPrint" Grid.Column="1" Tag="labelvprofPrint" Content="Print compile stats" />
+                                    <CheckBox Name="logPrint" Grid.Row="1" Tag="labellogPrint" Content="Print log" />
+                                    <CheckBox Name="dangerMode" Grid.Row="1" Grid.Column="1" Tag="labeldangerMode" Content="Ignore schema mismatches" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- what is compiled where, with what, and what it says -->
+                <DockPanel Grid.Column="2" Margin="0,0,0,8">
+                    <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,8">
+                        <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
+                            <TextBlock Classes="label" Text="Map:" />
+                            <SelectableTextBlock Name="mapLabel" Grid.Column="1" Grid.ColumnSpan="2" Classes="value" Text="N/A" />
+
+                            <TextBlock Grid.Row="2" Classes="label" Text="Output:" />
+                            <SelectableTextBlock Name="outputdir" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Classes="value" Text="N/A" />
+
+                            <TextBlock Grid.Row="4" Classes="label" Text="Game dir:" />
+                            <SelectableTextBlock Name="gamedir" Grid.Row="4" Grid.Column="1" Classes="value" Text="N/A" />
+                            <Button Name="button3" Grid.Row="4" Grid.Column="2" Margin="8,0,0,0" Tag="labelCustomPath" Content="Custom Path" Click="button3_Click" />
+
+                            <TextBlock Grid.Row="6" Classes="label" Text="Threads:" />
+                            <NumericUpDown Name="threadcount" Grid.Row="6" Grid.Column="1" Width="120" HorizontalAlignment="Left" Classes="threads" Tag="labelThreads" />
+                        </Grid>
+                    </Border>
+
+                    <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,8">
+                        <StackPanel>
+                            <TextBlock Classes="heading" Text="Command line" />
+                            <SelectableTextBlock Name="cmdLine" Classes="value" Text="N/A" FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="12" />
+                        </StackPanel>
+                    </Border>
+
+                    <Border Classes="card">
+                        <DockPanel>
+                            <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
+                                    <Button Content="Copy" Click="OnCopyLog" ToolTip.Tip="Copy the selected lines, or the whole log when none are selected" />
+                                    <Button Content="Clear" Click="OnClearLog" />
+                                </StackPanel>
+                                <TextBlock Classes="heading" Text="Compile log" Margin="0" VerticalAlignment="Center" />
+                            </DockPanel>
+                            <ListBox Name="logList" SelectionMode="Multiple" Background="{DynamicResource FieldBrush}" CornerRadius="4">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate x:DataType="local:LogLine">
+                                        <TextBlock Classes="log" Classes.warning="{Binding IsWarning}" Classes.error="{Binding IsError}" Classes.app="{Binding IsApp}" Text="{Binding Text}" />
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </DockPanel>
+                    </Border>
+                </DockPanel>
+            </Grid>
+        </DockPanel>
+    </Panel>
+</Window>
