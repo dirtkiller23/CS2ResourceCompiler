@@ -264,9 +264,7 @@
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" Margin="12,0" VerticalAlignment="Center">
                     <TextBlock Text="Game" VerticalAlignment="Center" Foreground="{DynamicResource ContrastSoftBrush}" />
-                    <Border Name="cs2statusPill" Classes="pill missing">
-                        <TextBlock Name="cs2status" Tag="labelgamestatus" Text="Not Found" />
-                    </Border>
+                    <ComboBox Name="gameList" Tag="labelgamestatus" PlaceholderText="Not Found" MinWidth="160" VerticalAlignment="Center" SelectionChanged="OnGameChanged" />
                     <TextBlock Text="Tools" Margin="8,0,0,0" VerticalAlignment="Center" Foreground="{DynamicResource ContrastSoftBrush}" />
                     <Border Name="wststatusPill" Classes="pill missing">
                         <TextBlock Name="wststatus" Tag="labeltoolstatus" Text="Not Found" />

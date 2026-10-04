@@ -21,7 +21,6 @@ using Avalonia.Platform.Storage;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
-using Microsoft.Win32;
 using Wacton.Unicolour;
 
 namespace CS2MapCompiler;
@@ -107,95 +106,68 @@ public partial class MainWindow : Window
         };
     }
 
-    private static string? GetCS2Dir()
-    {
-        if (!OperatingSystem.IsWindows())
-            return null;
-
-        string? steamPath = (string?)Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamPath", "");
-
-        if (string.IsNullOrEmpty(steamPath))
-            return null;
-
-        string pathsFile = Path.Combine(steamPath, "steamapps", "libraryfolders.vdf");
-
-        if (!File.Exists(pathsFile))
-            return null;
-
-        List<string> libraries = new List<string>();
-        libraries.Add(Path.Combine(steamPath));
-
-        var pathVDF = File.ReadAllLines(pathsFile);
-        // Okay, this is not a full vdf-parser, but it seems to work pretty much, since the
-        // vdf-grammar is pretty easy. Hopefully it never breaks. I'm too lazy to write a full vdf-parser though.
-        Regex pathRegex = new Regex(@"\""(([^\""]*):\\([^\""]*))\""");
-        foreach (var line in pathVDF)
-        {
-            if (pathRegex.IsMatch(line))
-            {
-                string match = pathRegex.Matches(line)[0].Groups[1].Value;
-
-                // De-Escape vdf.
-                libraries.Add(match.Replace("\\\\", "\\", StringComparison.Ordinal));
-            }
-        }
-
-        foreach (var library in libraries)
-        {
-            string cs2Path = Path.Combine(library, "steamapps\\common\\Counter-Strike Global Offensive\\game\\bin\\win64");
-            if (Directory.Exists(cs2Path))
-            {
-                return cs2Path;
-            }
-        }
-
-        return null;
-    }
-
+    // Lists the games installed through Steam and picks the first, the one preferred
     private async void Form1_Load(object? sender, RoutedEventArgs e)
     {
-        cs2dir = GetCS2Dir();
-        await CS2Validator();
-        gamedir.Text = cs2dir ?? "N/A";
+        foreach (var installed in Games.Installed())
+        {
+            AddGame(installed);
+        }
+
+        if (gameList.ItemCount > 0)
+        {
+            gameList.SelectedIndex = 0;
+        }
+        else
+        {
+            await CS2Validator();
+        }
+    }
+
+    // Adds a game to the dropdown, with its folder as the tooltip, since two installs of a game share its name
+    private ComboBoxItem AddGame(InstalledGame installed)
+    {
+        var item = new ComboBoxItem { Content = installed.Info.Name, Tag = installed.Folder };
+        ToolTip.SetTip(item, installed.Folder);
+        gameList.Items.Add(item);
+        return item;
+    }
+
+    private async void OnGameChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (gameList.SelectedItem is ComboBoxItem { Tag: string folder })
+        {
+            cs2dir = folder;
+            gamedir.Text = cs2dir;
+            await CS2Validator();
+            UpdateArgLabel();
+        }
     }
 
     private async Task CS2Validator()
     {
-        bool anyExecutableFound = false;
-
-        foreach (var (found, exe) in Games.All.SelectMany(g => g.Executables.Select(exe => (g.Game, exe))))
+        if (cs2dir == null || Games.Find(cs2dir) is not { } found)
         {
-            if (cs2dir != null && File.Exists(Path.Combine(cs2dir, exe)))
-            {
-                anyExecutableFound = true;
-                SetStatus(cs2statusPill, cs2status, $"Found {exe}", found: true);
-                button1.IsEnabled = true;
-                game = found;
-                BuildOptions();
-
-                if (File.Exists(Path.Combine(cs2dir, "resourcecompiler.exe")))
-                {
-                    SetStatus(wststatusPill, wststatus, "Found", found: true);
-                    resourcecompiler = Path.Combine(cs2dir, "resourcecompiler.exe");
-                    button1.IsEnabled = true;
-                }
-                else
-                {
-                    SetStatus(wststatusPill, wststatus, "Not Found", found: false);
-                    button1.IsEnabled = false;
-                    await MessageDialog.ShowAsync(this, MessageKind.Warning, "CS2 Map Compiler", "Please Install Workshop Tools!");
-                }
-
-                break; // Exit the loop once any executable is found
-            }
-        }
-
-        if (!anyExecutableFound)
-        {
-            SetStatus(cs2statusPill, cs2status, "Not Found", found: false);
             SetStatus(wststatusPill, wststatus, "Not Found", found: false);
             button1.IsEnabled = false;
-            await MessageDialog.ShowAsync(this, MessageKind.Danger, "CS2 Map Compiler", "CS2 Installation Not Found! Please install the game or set the path manually with Custom Path!");
+            await MessageDialog.ShowAsync(this, MessageKind.Danger, "CS2 Map Compiler", "No Source 2 game found! Please install one through Steam or set the path manually with Custom Path!");
+            return;
+        }
+
+        game = found.Game;
+        BuildOptions();
+
+        if (File.Exists(Path.Combine(cs2dir, "resourcecompiler.exe")))
+        {
+            SetStatus(wststatusPill, wststatus, "Found", found: true);
+            resourcecompiler = Path.Combine(cs2dir, "resourcecompiler.exe");
+            button1.IsEnabled = true;
+        }
+        else
+        {
+            SetStatus(wststatusPill, wststatus, "Not Found", found: false);
+            button1.IsEnabled = false;
+            await MessageDialog.ShowAsync(this, MessageKind.Warning, "CS2 Map Compiler", "Please Install Workshop Tools!");
         }
     }
 
@@ -425,12 +397,11 @@ public partial class MainWindow : Window
             FileTypeFilter = [new FilePickerFileType("Executable Files") { Patterns = [.. Games.Executables] }],
         });
 
-        if (files.Count > 0 && files[0].TryGetLocalPath() is { } file)
+        if (files.Count > 0 && files[0].TryGetLocalPath() is { } file && Path.GetDirectoryName(file) is { } folder && Games.Find(folder) is { } info)
         {
-            cs2dir = Path.GetDirectoryName(file);
-            await CS2Validator();
-            gamedir.Text = cs2dir;
-            UpdateArgLabel();
+            // a game outside Steam's libraries joins the dropdown
+            gameList.SelectedItem = gameList.Items.OfType<ComboBoxItem>().FirstOrDefault(item => string.Equals((string?)item.Tag, folder, StringComparison.OrdinalIgnoreCase))
+                ?? AddGame(new InstalledGame(info, folder));
         }
     }
 
@@ -834,7 +805,7 @@ public partial class MainWindow : Window
     {
         {"labelCancel", "Cancel build."},
         {"labelCustomPath", "Override game path."},
-        {"labelgamestatus", "Current game status. Game executable must be present."},
+        {"labelgamestatus", "The game to compile with, from the Source 2 games installed through Steam and any picked with Custom Path."},
         {"labeltoolstatus", "Current tools status. resourcecompiler.exe must be present."},
         {"labeloverrideoutput", "Override map vpk output path."},
         {"labelopenvmap", "Open .vmap file."},

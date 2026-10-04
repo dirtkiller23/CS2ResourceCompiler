@@ -30,6 +30,7 @@
       <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="ValveResourceFormat" Version="20.0.6980" />
     <PackageReference Include="Wacton.Unicolour" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
