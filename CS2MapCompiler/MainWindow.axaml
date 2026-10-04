@@ -90,6 +90,10 @@
         <Style Selector="Border.card CheckBox">
             <Setter Property="MinHeight" Value="28" />
         </Style>
+        <!-- an option with a description under it, spaced so each reads as one item -->
+        <Style Selector="CheckBox.described">
+            <Setter Property="Margin" Value="0,4" />
+        </Style>
         <Style Selector="Border.card ComboBox">
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="Margin" Value="0,2" />
@@ -129,9 +133,75 @@
             <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
         </Style>
-        <Style Selector="Button.preset">
-            <Setter Property="Margin" Value="0,0,6,6" />
-            <Setter Property="MinWidth" Value="100" />
+        <!-- a stage's card header, its name and the switch that turns the stage on or off -->
+        <Style Selector="DockPanel.stage">
+            <Setter Property="Margin" Value="0,0,0,2" />
+        </Style>
+        <Style Selector="DockPanel.stage TextBlock.heading">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="0" />
+        </Style>
+        <Style Selector="DockPanel.stage ToggleSwitch">
+            <Setter Property="OnContent" Value="" />
+            <Setter Property="OffContent" Value="" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Border.card:disabled">
+            <Setter Property="Opacity" Value="0.5" />
+        </Style>
+
+        <!-- a choice of a few values, all of them shown, the chosen one in the accent -->
+        <Style Selector="ListBox.segmented">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+            <Setter Property="ItemsPanel">
+                <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                </ItemsPanelTemplate>
+            </Setter>
+        </Style>
+        <Style Selector="ListBox.segmented ListBoxItem">
+            <Setter Property="Padding" Value="6,5" />
+            <Setter Property="Margin" Value="0,0,4,0" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastBrush}" />
+        </Style>
+        <Style Selector="ListBox.segmented ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource ControlHoverBrush}" />
+        </Style>
+        <Style Selector="ListBox.segmented ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource OnAccentBrush}" />
+        </Style>
+
+        <!-- debug and advanced options, folded away under a plain header -->
+        <Style Selector="Expander.debug">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0,10,0,0" />
+            <Setter Property="Padding" Value="8,0,0,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="Expander.debug /template/ ToggleButton#ExpanderHeader">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+            <Setter Property="MinHeight" Value="28" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
+        </Style>
+        <Style Selector="Expander.debug /template/ ToggleButton#ExpanderHeader /template/ Border#ToggleButtonBackground">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Expander.debug /template/ Border#ExpanderContent">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
 
         <!-- pills: whether the game and its tools were found -->
@@ -237,128 +307,30 @@
             </Grid>
 
             <Grid Margin="8,0" ColumnDefinitions="620,8,*">
-                <!-- the options, in Hammer's groups -->
+                <!-- the options: a preset, then the cards CompileOptions defines, filled in by the window -->
                 <ScrollViewer>
                     <StackPanel Spacing="8" Margin="0,0,14,8">
                         <Border Classes="card">
                             <StackPanel>
-                                <TextBlock Classes="heading" Text="Presets" Margin="0,0,0,8" />
-                                <WrapPanel>
-                                    <Button Name="PresetFullBuild" Classes="preset" Tag="labelfullbuild" Content="Full Compile" Click="PresetFullBuild_Click" />
-                                    <Button Name="PresetFastBuild" Classes="preset" Tag="labelfastbuild" Content="Fast Compile" Click="PresetFastBuild_Click" />
-                                    <Button Name="PresetFinalBuild" Classes="preset" Tag="labelfinalbuild" Content="Final Compile" Click="PresetFinalBuild_Click" />
-                                    <Button Name="PresetOnlyEntities" Classes="preset" Tag="labelentsonly" Content="Only Entities" Click="PresetOnlyEntities_Click" />
-                                    <Button Name="PresetCustom" Classes="preset" Tag="labelcustom" Content="Custom" Click="PresetCustom_Click" />
-                                </WrapPanel>
+                                <TextBlock Classes="heading" Text="Preset" />
+                                <ListBox Name="presetList" Classes="segmented" Margin="0,4,0,0" />
+                                <TextBlock Name="presetNote" Classes="note" Margin="0,8,0,2" />
                             </StackPanel>
                         </Border>
 
                         <Grid ColumnDefinitions="*,8,*">
-                            <StackPanel Spacing="8">
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="World" />
-                                        <CheckBox Name="buildworld" Tag="labelBuildWorld" Content="Build World" IsChecked="True" />
-                                        <CheckBox Name="entsOnly" Tag="labelEntsOnly" Content="Entities Only" />
-                                        <CheckBox Name="settlephys" Tag="labelSettlePhys" Content="Pre-Settle physics objects" IsChecked="True" />
-                                        <CheckBox Name="debugVisGeo" Tag="labelDebugVisGeo" Content="Debug Vis Geometry" />
-                                        <CheckBox Name="onlyBaseTileMesh" Tag="labelOnlyBaseTileMesh" Content="Only base tile mesh geometry" />
-                                        <CheckBox Name="builddynamicsurfaceeffects" Tag="labelDynamicSurfaceEffects" Content="Build World Dynamic Surface Effects" IsChecked="True" />
-                                        <CheckBox Name="buildDeformables" Tag="labelDeformable" Content="Build Deformable Geometry" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="Physics" />
-                                        <CheckBox Name="buildPhys" Tag="labelbuildPhys" Content="Build physics" IsChecked="True" />
-                                        <CheckBox Name="legacyCompileColMesh" Tag="labellegacyCompileColMesh" Content="Legacy Compile Collision Mesh" IsEnabled="False" IsVisible="False" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="Visibility" />
-                                        <CheckBox Name="buildVis" Tag="labelbuildVis" Content="Build vis" IsChecked="True" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="Nav" />
-                                        <CheckBox Name="buildNav" Tag="labelbuildNav" Content="Build Nav" IsChecked="True" />
-                                        <CheckBox Name="gridNav" Tag="labelgridNav" Content="Build Grid Nav" />
-                                        <CheckBox Name="navDbg" Tag="labelnavDbg" Content="Save debug stages to file" />
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" Spacing="8">
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="Baked Lighting" />
-                                        <TextBlock Name="cpuLabel" Classes="note" Text="Use CPU if you don't have a RT-capable GPU. Now broken!" />
-                                        <CheckBox Name="genLightmaps" Tag="labelgenLightmaps" Content="Generate Lightmaps" IsChecked="True" />
-                                        <CheckBox Name="cpu" Tag="labelCPUcompile" Content="Use CPU" />
-                                        <CheckBox Name="nolightmaps" Content="No Lightmaps" IsEnabled="False" IsVisible="False" />
-                                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,4">
-                                            <TextBlock Classes="label" Text="Resolution:" />
-                                            <ComboBox Name="lightmapres" Grid.Column="1" Tag="labellightmapres">
-                                                <x:String>8192</x:String>
-                                                <x:String>4096</x:String>
-                                                <x:String>2048</x:String>
-                                                <x:String>1024</x:String>
-                                                <x:String>512</x:String>
-                                            </ComboBox>
-                                            <TextBlock Grid.Row="1" Classes="label" Text="Quality:" />
-                                            <ComboBox Name="lightmapquality" Grid.Row="1" Grid.Column="1" Tag="labellightmapquality">
-                                                <x:String>Fast</x:String>
-                                                <x:String>Standard</x:String>
-                                                <x:String>Final</x:String>
-                                            </ComboBox>
-                                        </Grid>
-                                        <CheckBox Name="compression" Tag="labelCompression" Content="Compression" IsChecked="True" />
-                                        <CheckBox Name="noiseremoval" Tag="labelnoiseremoval" Content="Noise Removal" IsChecked="True" />
-                                        <CheckBox Name="noLightCalc" Tag="labelnoLightCalc" Content="Disable lighting calculations" />
-                                        <CheckBox Name="useDeterCharts" Tag="labeluseDeterCharts" Content="Deterministic charting computations" />
-                                        <CheckBox Name="writeDebugPT" Tag="labelwriteDebugPT" Content="Write Debug Path Trace Info" />
-                                        <CheckBox Name="vrad3LargeSize" Tag="labellargesize" Content="VRAD3 Large block size" IsChecked="True" />
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Classes="card">
-                                    <StackPanel>
-                                        <TextBlock Classes="heading" Text="Steam Audio" />
-                                        <CheckBox Name="saReverb" Tag="labelsaReverb" Content="Bake reverb" IsChecked="True" />
-                                        <CheckBox Name="baPaths" Tag="labelsaPaths" Content="Bake paths" IsChecked="True" />
-                                        <CheckBox Name="bakeCustom" Tag="labelbakeCustom" Content="Bake Custom Data" />
-                                        <Grid ColumnDefinitions="Auto,*" Margin="0,4,0,0">
-                                            <TextBlock Name="AudioThreadsLabel" Classes="label" Tag="labelsaThreads" Text="Audio Threads:" />
-                                            <NumericUpDown Name="AudioThreadsBox" Grid.Column="1" Classes="threads" Tag="labelsaThreads" />
-                                        </Grid>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
+                            <StackPanel Name="leftColumn" Spacing="8" />
+                            <StackPanel Name="rightColumn" Grid.Column="2" Spacing="8" />
                         </Grid>
 
-                        <Border Classes="card">
-                            <StackPanel>
-                                <TextBlock Classes="heading" Text="Extra" />
-                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto">
-                                    <CheckBox Name="vconPrint" Tag="labelvconPrint" Content="Print to VConsole" />
-                                    <CheckBox Name="vprofPrint" Grid.Column="1" Tag="labelvprofPrint" Content="Print compile stats" />
-                                    <CheckBox Name="logPrint" Grid.Row="1" Tag="labellogPrint" Content="Print log" />
-                                    <CheckBox Name="dangerMode" Grid.Row="1" Grid.Column="1" Tag="labeldangerMode" Content="Ignore schema mismatches" />
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+                        <StackPanel Name="bottomColumn" Spacing="8" />
                     </StackPanel>
                 </ScrollViewer>
 
                 <!-- what is compiled where, with what, and what it says -->
                 <DockPanel Grid.Column="2" Margin="0,0,0,8">
                     <Border DockPanel.Dock="Top" Classes="card" Margin="0,0,0,8">
-                        <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,8,Auto,8,Auto,8,Auto">
+                        <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,8,Auto,8,Auto">
                             <TextBlock Classes="label" Text="Map:" />
                             <SelectableTextBlock Name="mapLabel" Grid.Column="1" Grid.ColumnSpan="2" Classes="value" Text="N/A" />
 
@@ -368,9 +340,6 @@
                             <TextBlock Grid.Row="4" Classes="label" Text="Game dir:" />
                             <SelectableTextBlock Name="gamedir" Grid.Row="4" Grid.Column="1" Classes="value" Text="N/A" />
                             <Button Name="button3" Grid.Row="4" Grid.Column="2" Margin="8,0,0,0" Tag="labelCustomPath" Content="Custom Path" Click="button3_Click" />
-
-                            <TextBlock Grid.Row="6" Classes="label" Text="Threads:" />
-                            <NumericUpDown Name="threadcount" Grid.Row="6" Grid.Column="1" Width="120" HorizontalAlignment="Left" Classes="threads" Tag="labelThreads" />
                         </Grid>
                     </Border>
 

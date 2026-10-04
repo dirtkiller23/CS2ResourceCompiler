@@ -6,9 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -27,7 +30,6 @@ public partial class MainWindow : Window
     private string? mappath;
     private string? outputpath;
     private string? arg;
-    private bool oldsource2pre2020; // this parameter enables parameters for S2 games pre 2021 and disables the post 2021 parameters.
     private Process? process;
 
     /// <summary>The compile running, from its start to the end of its output.</summary>
@@ -52,23 +54,16 @@ public partial class MainWindow : Window
         // the compiler prints faster than lines can be shown one by one, so what it printed is shown a few times a second
         new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, (_, _) => FlushLog()).Start();
 
-        genLightmaps.IsCheckedChanged += genLightmaps_CheckedChanged;
-        entsOnly.IsCheckedChanged += entsOnly_CheckedChanged;
-
-        lightmapres.SelectedIndex = 2;
-        lightmapquality.SelectedIndex = 1;
-
-        // any thread count from one to all of them, typed or stepped, and pulled back into that range when it is outside it
-        int cpuCount = Environment.ProcessorCount;
-        foreach (var box in new[] { threadcount, AudioThreadsBox })
+        foreach (var preset in AllPresets)
         {
-            box.Maximum = cpuCount;
-            box.Value = cpuCount;
+            var item = new ListBoxItem { Content = preset.Name };
+            ToolTip.SetTip(item, preset.Help);
+            presetList.Items.Add(item);
         }
 
-        Checkers();
+        presetList.SelectionChanged += OnPresetChanged;
+        BuildOptions();
         HelpSystemEventReg();
-        UpdateArgLabel();
 
         Loaded += Form1_Load;
         Closed += (_, _) =>
@@ -134,65 +129,17 @@ public partial class MainWindow : Window
 
     private async Task CS2Validator()
     {
-        string[] requiredExecutables = { "cs2.exe", "hlvr.exe", "project8.exe", "deadlock.exe", "primelock.exe", "hlx.exe", "hl3.exe", "steamtours.exe", "dota2.exe", "deskjob.exe", "vr.exe" };
         bool anyExecutableFound = false;
 
-        foreach (string exe in requiredExecutables)
+        foreach (var (found, exe) in Games.All.SelectMany(g => g.Executables.Select(exe => (g.Game, exe))))
         {
             if (cs2dir != null && File.Exists(Path.Combine(cs2dir, exe)))
             {
                 anyExecutableFound = true;
                 SetStatus(cs2statusPill, cs2status, $"Found {exe}", found: true);
                 button1.IsEnabled = true;
-                if (exe != "cs2.exe" && exe != "project8.exe" && exe != "deadlock.exe" && exe != "hl3.exe" && exe != "hlx.exe" && exe != "dota2.exe" && exe != "primelock.exe")
-                { //the future stares back - todo add resourcecompiler parameters for future s2 versions/games
-                    oldsource2pre2020 = true;
-                }
-
-                if (oldsource2pre2020 == true) //if its not a S2 game post 2021, then assume we are a s2 game pre 2021 and disable post 2021 features like GPU VRAD3.
-                                               //todo add support for envmaps and nolight/old light from 2015-2016
-                {
-                    cpu.IsEnabled = false;
-                    cpu.IsVisible = false;
-                    legacyCompileColMesh.IsEnabled = false;
-                    legacyCompileColMesh.IsVisible = false;
-                    bakeCustom.IsEnabled = false;
-                    bakeCustom.IsVisible = false;
-                    AudioThreadsBox.IsVisible = false;
-                    AudioThreadsBox.IsEnabled = false;
-                    AudioThreadsLabel.IsVisible = false;
-                    AudioThreadsLabel.IsEnabled = false;
-                    vrad3LargeSize.IsVisible = false;
-                    vrad3LargeSize.IsEnabled = false;
-                    cpuLabel.Text = "Only CPU lightmap is supported.";
-                }
-
-                if (exe == "deskjob.exe") //if deskjob - disable the lighting options by default as there is no vrad3
-                {
-                    genLightmaps.IsChecked = false;
-                    noiseremoval.IsChecked = false;
-                    cpuLabel.Text = "No light is possible.";
-                }
-
-                if (exe != "dota2.exe")
-                {
-                    gridNav.IsEnabled = false;
-                    gridNav.IsVisible = false;
-                    nolightmaps.IsEnabled = false;
-                    nolightmaps.IsVisible = false;
-                }
-                else
-                if (exe == "dota2.exe") //if dota 2 - show grid nav button and uncheck others.
-                {
-                    gridNav.IsEnabled = true;
-                    gridNav.IsVisible = true;
-                    genLightmaps.IsChecked = false;
-                    noiseremoval.IsChecked = false;
-                    buildNav.IsChecked = false;
-                    saReverb.IsChecked = false;
-                    baPaths.IsChecked = false;
-                    bakeCustom.IsChecked = false;
-                }
+                game = found;
+                BuildOptions();
 
                 if (File.Exists(Path.Combine(cs2dir, "resourcecompiler.exe")))
                 {
@@ -240,176 +187,7 @@ public partial class MainWindow : Window
 
     private string ArgumentBuilder()
     {
-        List<string> args = new List<string>();
-        string inputFlag = IsTextFile(mappath) ? "-filelist" : "-i";
-        string argument = $"-threads {Threads(threadcount)} -fshallow -maxtextureres 256 -dxlevel 110 -quiet -unbufferedio {inputFlag} " + string.Format(null, "\"{0}\"", mappath) + " -noassert ";
-
-        if (buildworld.IsChecked == true)
-        {
-            args.Add("-world");
-            args.Remove("-entities");
-        }
-        if (builddynamicsurfaceeffects.IsChecked != true)
-        {
-            args.Add("-skipauxfiles");
-        }
-        if (buildDeformables.IsChecked == true)
-        {
-            args.Add("-deformables forced");
-        }
-        if (entsOnly.IsChecked == true)
-        {
-            args.Add("-entities");
-            args.Remove("-world");
-            args.Remove($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            args.Remove($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            args.Remove($"-sacustomdata_threads {Threads(AudioThreadsBox)}");
-        }
-        if (settlephys.IsChecked != true)
-        {
-            args.Add("-nosettle");
-        }
-        if (debugVisGeo.IsChecked == true)
-        {
-            args.Add("-debugvisgeo");
-        }
-        if (onlyBaseTileMesh.IsChecked == true)
-        {
-            args.Add("-tileMeshBaseGeometry");
-        }
-        if (genLightmaps.IsChecked == true)
-        {
-            args.Add("-bakelighting");
-            if (oldsource2pre2020 == true)
-            {
-                args.Add("-vrad3");
-                if (compression.IsChecked == true)
-                {
-                    args.Add("-lightmapCompressionDisabled 0");
-                }
-            }
-            if (cpu.IsChecked == true)
-            {
-                args.Add("-lightmapcpu");
-            }
-            args.Add("-lightmapMaxResolution " + lightmapres.SelectedItem);
-            args.Add("-lightmapDoWeld");
-            args.Add("-lightmapVRadQuality " + lightmapquality.SelectedIndex);
-            if (noiseremoval.IsChecked != true)
-            {
-                args.Add("-lightmapDisableFiltering");
-            }
-            if (compression.IsChecked != true)
-            {
-                args.Add("-lightmapCompressionDisabled");
-                if (oldsource2pre2020 == true)
-                {
-                    args.Remove("-lightmapCompressionDisabled 0");
-                    args.Add("-lightmapCompressionDisabled 1");
-                }
-            }
-            if (noLightCalc.IsChecked == true)
-            {
-                args.Add("-disableLightingCalculations");
-            }
-            if (useDeterCharts.IsChecked == true)
-            {
-                args.Add("-lightmapDeterministicCharts");
-            }
-            if (writeDebugPT.IsChecked == true)
-            {
-                args.Add("-write_debug_path_trace_scene_info");
-            }
-            if (vrad3LargeSize.IsChecked == true)
-            {
-                args.Add("-vrad3LargeBlockSize");
-            }
-            args.Add("-lightmapLocalCompile");
-        }
-        else if (genLightmaps.IsChecked != true)
-        {
-            args.Add("-nolightmaps");
-        }
-        /*if (nolightmaps.Checked)
-        {
-            args.Add("-nolightmaps");
-        }
-        if (!nolightmaps.Checked)
-        {
-            args.Remove("-nolightmaps");
-        }*/
-        if (buildPhys.IsChecked == true)
-        {
-            args.Add("-phys");
-        }
-        if (legacyCompileColMesh.IsChecked == true)
-        {
-            args.Add("-legacycompilecollisionmesh");
-        }
-        if (buildVis.IsChecked == true)
-        {
-            args.Add("-vis");
-        }
-        if (buildNav.IsChecked == true)
-        {
-            args.Add("-nav");
-        }
-        if (navDbg.IsChecked == true)
-        {
-            args.Add("-navdbg");
-        }
-        if (gridNav.IsChecked == true)
-        {
-            args.Add("-gridnav");
-        }
-        if (saReverb.IsChecked == true)
-        {
-            args.Add("-sareverb");
-            args.Add($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            if (oldsource2pre2020 == true)
-            {
-                args.Remove($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            }
-        }
-        if (baPaths.IsChecked == true)
-        {
-            args.Add("-sapaths");
-            args.Add($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            if (oldsource2pre2020 == true)
-            {
-                args.Remove($"-sareverb_threads {Threads(AudioThreadsBox)}");
-            }
-        }
-        if (bakeCustom.IsChecked == true)
-        {
-            args.Add("-sacustomdata");
-            args.Add($"-sacustomdata_threads {Threads(AudioThreadsBox)}");
-        }
-        if (vconPrint.IsChecked == true)
-        {
-            args.Add("-vconsole");
-            args.Add("-vconport 29000");
-        }
-        if (vprofPrint.IsChecked == true)
-        {
-            args.Add("-resourcecompiler_log_compile_stats");
-        }
-        if (logPrint.IsChecked == true)
-        {
-            args.Add("-condebug");
-            args.Add("-consolelog");
-        }
-        if (dangerMode.IsChecked == true)
-        {
-            args.Add("-danger_mode_ignore_schema_mismatches");
-        }
-        args.Add("-retail -breakpad -nop4 -outroot ");
-        if (oldsource2pre2020 == true)
-        {
-            args.Add("-retail -breakpad -nompi -nop4 -outroot ");
-            args.Remove("-retail -breakpad -nop4 -outroot ");
-        }
-        return argument + string.Join(" ", args.ToArray());
+        return CompileOptions.BuildArguments(values, game, mappath);
     }
 
     private void UpdateArgLabel()
@@ -538,7 +316,8 @@ public partial class MainWindow : Window
     // The lightmap preview only works with GPU bakes
     private bool BakesLightmapsOnGpu()
     {
-        return genLightmaps.IsChecked == true && cpu.IsChecked != true && !oldsource2pre2020;
+        var options = new OptionValues(values, game);
+        return options.On("lighting") && !options.On("cpu") && !game.IsLegacy();
     }
 
     // For a map in content\<addons>\<addon> this is game\<addons>\<addon>\_vrad3, and null for maps outside an addon
@@ -601,7 +380,7 @@ public partial class MainWindow : Window
         {
             Title = "Select the game executable",
             AllowMultiple = false,
-            FileTypeFilter = [new FilePickerFileType("Executable Files") { Patterns = ["cs2.exe", "hlvr.exe", "project8.exe", "deadlock.exe", "primelock.exe", "steamtours.exe", "deskjob.exe", "dota2.exe"] }],
+            FileTypeFilter = [new FilePickerFileType("Executable Files") { Patterns = [.. Games.Executables] }],
         });
 
         if (files.Count > 0 && files[0].TryGetLocalPath() is { } file)
@@ -611,65 +390,6 @@ public partial class MainWindow : Window
             gamedir.Text = cs2dir;
             UpdateArgLabel();
         }
-    }
-
-    private void genLightmaps_CheckedChanged(object? sender, RoutedEventArgs e)
-    {
-        if (genLightmaps.IsChecked == false)
-        {
-            cpu.IsEnabled = false;
-            lightmapres.IsEnabled = false;
-            lightmapquality.IsEnabled = false;
-            compression.IsEnabled = false;
-            noiseremoval.IsEnabled = false;
-            noLightCalc.IsEnabled = false;
-            useDeterCharts.IsEnabled = false;
-            writeDebugPT.IsEnabled = false;
-            vrad3LargeSize.IsEnabled = false;
-        }
-        else
-        {
-            cpu.IsEnabled = true;
-            lightmapres.IsEnabled = true;
-            lightmapquality.IsEnabled = true;
-            compression.IsEnabled = true;
-            noiseremoval.IsEnabled = true;
-            noLightCalc.IsEnabled = true;
-            useDeterCharts.IsEnabled = true;
-            writeDebugPT.IsEnabled = true;
-            vrad3LargeSize.IsEnabled = true;
-        }
-    }
-
-    /// <summary>Every option rebuilds the command line as it changes.</summary>
-    private void Checkers()
-    {
-        foreach (var control in this.GetLogicalDescendants())
-        {
-            switch (control)
-            {
-                case CheckBox box:
-                    box.IsCheckedChanged += OnSettingChanged;
-                    break;
-                case ComboBox combo:
-                    combo.SelectionChanged += OnSettingChanged;
-                    break;
-                case NumericUpDown number:
-                    number.ValueChanged += (_, _) => UpdateArgLabel();
-                    break;
-            }
-        }
-    }
-
-    /// <summary>The thread count in a box, or all threads while the box is empty, as it is when its text has been cleared.</summary>
-    private static int Threads(NumericUpDown box)
-    {
-        return (int)(box.Value ?? box.Maximum);
-    }
-
-    private void OnSettingChanged(object? sender, RoutedEventArgs e)
-    {
-        UpdateArgLabel();
     }
 
     private async void button4_Click(object? sender, RoutedEventArgs e)
@@ -763,242 +483,313 @@ public partial class MainWindow : Window
         }
     }
 
-    private void entsOnly_CheckedChanged(object? sender, RoutedEventArgs e)
+    // The game the tools belong to, CS2 until another is found. It decides which options there are
+    private Game game = Game.Cs2;
+
+    // every option the game has, by id. The controls, the presets and the command line all read and write this
+    private Dictionary<string, object> values = [];
+
+    // the control showing each option
+    private readonly Dictionary<string, Control> optionControls = [];
+
+    // each group's card, and the panel of its options that its switch greys out
+    private readonly List<(OptionGroup Group, Border Card, Panel? Options)> cards = [];
+
+    private static readonly Preset[] AllPresets = [.. CompileOptions.Presets, CompileOptions.Custom];
+
+    // set while a preset is applied, so its own changes don't pick a preset
+    private bool applyingPreset;
+
+    // set while the preset list is moved to the preset the options match, so that doesn't apply it
+    private bool selectingPreset;
+
+    // set while a control is moved to its option's value, so that isn't taken as a change
+    private bool showingValues;
+
+    // Builds the cards for the game's options, at their defaults
+    private void BuildOptions()
     {
-        if (entsOnly.IsChecked == false)
+        values = CompileOptions.DefaultsFor(game);
+        optionControls.Clear();
+        cards.Clear();
+        leftColumn.Children.Clear();
+        rightColumn.Children.Clear();
+        bottomColumn.Children.Clear();
+
+        foreach (var group in CompileOptions.Groups)
         {
-            genLightmaps.IsEnabled = true;
-            cpu.IsEnabled = true;
-            lightmapres.IsEnabled = true;
-            lightmapquality.IsEnabled = true;
-            noiseremoval.IsEnabled = true;
-            compression.IsEnabled = true;
-            useDeterCharts.IsEnabled = true;
-            noLightCalc.IsEnabled = true;
-            writeDebugPT.IsEnabled = true;
-            buildPhys.IsEnabled = true;
-            buildVis.IsEnabled = true;
-            buildNav.IsEnabled = true;
-            navDbg.IsEnabled = true;
-            saReverb.IsEnabled = true;
-            baPaths.IsEnabled = true;
-            bakeCustom.IsEnabled = true;
+            var column = group.Column switch
+            {
+                GroupColumn.Left => leftColumn,
+                GroupColumn.Right => rightColumn,
+                _ => bottomColumn,
+            };
+
+            column.Children.Add(BuildCard(group));
         }
+
+        SelectMatchingPreset();
+        UpdateArgLabel();
     }
 
-    private void PresetFullBuild_Click(object? sender, RoutedEventArgs e)
+    private Border BuildCard(OptionGroup group)
     {
-        //World
-        buildworld.IsChecked = true;
-        entsOnly.IsChecked = false;
-        settlephys.IsChecked = true;
-        debugVisGeo.IsChecked = false;
-        onlyBaseTileMesh.IsChecked = false;
-        builddynamicsurfaceeffects.IsChecked = true;
-        buildDeformables.IsChecked = false;
-        //Baked Lighting
-        genLightmaps.IsEnabled = true;
-        genLightmaps.IsChecked = true;
-        cpu.IsChecked = false;
-        nolightmaps.IsChecked = false;
-        lightmapres.SelectedIndex = 3;
-        lightmapquality.SelectedIndex = 1;
-        vrad3LargeSize.IsChecked = true;
-        compression.IsChecked = true;
-        noiseremoval.IsChecked = true;
-        noLightCalc.IsChecked = false;
-        useDeterCharts.IsChecked = false;
-        writeDebugPT.IsChecked = false;
-        //Phys
-        buildPhys.IsChecked = true;
-        legacyCompileColMesh.IsChecked = false;
-        //Vis
-        buildVis.IsChecked = true;
-        //Nav
-        buildNav.IsChecked = true;
-        if (gridNav.IsEnabled)
+        var content = new StackPanel();
+        var heading = new TextBlock { Classes = { "heading" }, Text = group.Name };
+
+        if (group.Switch is { } toggle)
         {
-            gridNav.IsChecked = true;
+            var header = new DockPanel { Classes = { "stage" } };
+            var control = Toggle(toggle, new ToggleSwitch());
+            DockPanel.SetDock(control, Dock.Right);
+            header.Children.Add(control);
+            header.Children.Add(heading);
+            content.Children.Add(header);
         }
-        navDbg.IsChecked = false;
-        //Steam Audio
-        saReverb.IsChecked = true;
-        baPaths.IsChecked = true;
-        bakeCustom.IsChecked = false; //yet
-        //Extra
-        vconPrint.IsChecked = false;
-        vprofPrint.IsChecked = false;
-        logPrint.IsChecked = false;
-        dangerMode.IsChecked = false;
+        else
+        {
+            content.Children.Add(heading);
+        }
+
+        foreach (var note in new[] { group.Note, group.GameNote(game) })
+        {
+            if (note != null)
+            {
+                content.Children.Add(new TextBlock { Classes = { "note" }, Text = note });
+            }
+        }
+
+        var available = group.Options.Where(o => o.Available(game)).ToArray();
+        Panel? options = null;
+
+        if (available.Length > 0)
+        {
+            options = new StackPanel();
+            options.Children.Add(Layout(available.Where(o => !o.Folded).ToArray(), group.Columns));
+
+            if (available.Where(o => o.Folded).ToArray() is { Length: > 0 } folded)
+            {
+                options.Children.Add(new Expander { Classes = { "debug" }, Header = group.FoldLabel, Content = Layout(folded, 1) });
+            }
+
+            content.Children.Add(options);
+        }
+
+        var card = new Border { Classes = { "card" }, Child = content };
+        cards.Add((group, card, options));
+        return card;
     }
 
-    private void PresetFastBuild_Click(object? sender, RoutedEventArgs e)
+    // Lays options out one under another, or across a few columns
+    private Panel Layout(CompileOption[] options, int columns)
     {
-        //World
-        buildworld.IsChecked = true;
-        entsOnly.IsChecked = false;
-        settlephys.IsChecked = true;
-        debugVisGeo.IsChecked = false;
-        onlyBaseTileMesh.IsChecked = false;
-        builddynamicsurfaceeffects.IsChecked = true;
-        buildDeformables.IsChecked = false;
-        //Baked Lighting
-        genLightmaps.IsChecked = false;
-        genLightmaps.IsEnabled = false;
-        //Phys
-        buildPhys.IsChecked = true;
-        legacyCompileColMesh.IsChecked = false;
-        //Vis
-        buildVis.IsChecked = false;
-        //Nav
-        buildNav.IsChecked = true;
-        if (gridNav.IsEnabled)
+        if (columns == 1)
         {
-            gridNav.IsChecked = true;
+            var stack = new StackPanel();
+
+            for (var i = 0; i < options.Length; i++)
+            {
+                stack.Children.Add(Row(options[i], i == 0 ? null : options[i - 1]));
+            }
+
+            return stack;
         }
-        navDbg.IsChecked = false;
-        //Steam Audio
-        saReverb.IsChecked = false;
-        baPaths.IsChecked = false;
-        bakeCustom.IsChecked = false; //yet
-        //Extra
-        vconPrint.IsChecked = false;
-        vprofPrint.IsChecked = false;
-        logPrint.IsChecked = false;
-        dangerMode.IsChecked = false;
+
+        var grid = new Grid { ColumnDefinitions = new ColumnDefinitions(string.Join(",", Enumerable.Repeat("*", columns))) };
+
+        for (var i = 0; i < options.Length; i++)
+        {
+            if (i % columns == 0)
+            {
+                grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            }
+
+            var row = Row(options[i], null);
+            Grid.SetRow(row, i / columns);
+            Grid.SetColumn(row, i % columns);
+            grid.Children.Add(row);
+        }
+
+        return grid;
     }
 
-    private void PresetFinalBuild_Click(object? sender, RoutedEventArgs e)
+    // The control for an option, with its label, and its help as a tooltip
+    private Control Row(CompileOption option, CompileOption? previous)
     {
-        //World
-        buildworld.IsChecked = true;
-        entsOnly.IsChecked = false;
-        settlephys.IsChecked = true;
-        debugVisGeo.IsChecked = false;
-        onlyBaseTileMesh.IsChecked = false;
-        builddynamicsurfaceeffects.IsChecked = true;
-        buildDeformables.IsChecked = false;
-        //Baked Lighting
-        genLightmaps.IsEnabled = true;
-        genLightmaps.IsChecked = true;
-        cpu.IsChecked = false;
-        nolightmaps.IsChecked = false;
-        lightmapres.SelectedIndex = 2;
-        lightmapquality.SelectedIndex = 2;
-        vrad3LargeSize.IsChecked = true;
-        compression.IsChecked = true;
-        noiseremoval.IsChecked = true;
-        noLightCalc.IsChecked = false;
-        useDeterCharts.IsChecked = false;
-        writeDebugPT.IsChecked = false;
-        //Phys
-        buildPhys.IsChecked = true;
-        legacyCompileColMesh.IsChecked = false;
-        //Vis
-        buildVis.IsChecked = true;
-        //Nav
-        buildNav.IsChecked = true;
-        if (gridNav.IsEnabled)
+        Control row;
+
+        switch (option.Kind)
         {
-            gridNav.IsChecked = true;
+            case OptionKind.Choice:
+                var list = new ListBox { Name = option.Id, Classes = { "segmented" }, ItemsSource = option.Choices, SelectedItem = values[option.Id] };
+                list.SelectionChanged += (_, _) =>
+                {
+                    if (list.SelectedItem is string item)
+                    {
+                        OnOptionChanged(option, item);
+                    }
+                };
+                optionControls[option.Id] = list;
+                row = new StackPanel
+                {
+                    Children =
+                    {
+                        new TextBlock { Classes = { "label" }, Text = option.Label, Margin = new Thickness(0, previous == null ? 6 : 10, 0, 6) },
+                        list,
+                    },
+                };
+                break;
+
+            case OptionKind.Threads:
+                var number = new NumericUpDown { Name = option.Id, Classes = { "threads" }, Width = 120, Maximum = Environment.ProcessorCount, Value = (int)values[option.Id] };
+                // a box whose text was cleared means every thread
+                number.ValueChanged += (_, _) => OnOptionChanged(option, (int)(number.Value ?? number.Maximum));
+                optionControls[option.Id] = number;
+                row = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Margin = new Thickness(0, previous == null ? 0 : 4, 0, 0),
+                    Children = { new TextBlock { Classes = { "label" }, Text = option.Label }, number },
+                };
+                break;
+
+            default:
+                var box = new CheckBox();
+
+                if (option.Description != null)
+                {
+                    box.Classes.Add("described");
+                    box.Content = new StackPanel { Children = { new TextBlock { Text = option.Label }, new TextBlock { Classes = { "note" }, Text = option.Description, Margin = new Thickness(0) } } };
+
+                    // a little more room under a row of choices
+                    if (previous?.Kind == OptionKind.Choice)
+                    {
+                        box.Margin = new Thickness(0, 8, 0, 4);
+                    }
+                }
+                else
+                {
+                    box.Content = option.Label;
+                }
+
+                row = Toggle(option, box);
+                break;
         }
-        navDbg.IsChecked = false;
-        //Steam Audio
-        saReverb.IsChecked = true;
-        baPaths.IsChecked = true;
-        bakeCustom.IsChecked = false;
-        //Extra
-        vconPrint.IsChecked = false;
-        vprofPrint.IsChecked = false;
-        logPrint.IsChecked = false;
-        dangerMode.IsChecked = false;
+
+        ToolTip.SetTip(row, option.Help);
+        ToolTip.SetShowOnDisabled(row, true);
+        return row;
     }
 
-    private void PresetOnlyEntities_Click(object? sender, RoutedEventArgs e)
+    private ToggleButton Toggle(CompileOption option, ToggleButton toggle)
     {
-        //World
-        buildworld.IsChecked = true;
-        entsOnly.IsChecked = true;
-        settlephys.IsChecked = true;
-        debugVisGeo.IsChecked = false;
-        onlyBaseTileMesh.IsChecked = false;
-        builddynamicsurfaceeffects.IsChecked = true;
-        buildDeformables.IsChecked = false;
-        //Baked Lighting
-        genLightmaps.IsChecked = false;
-        genLightmaps.IsEnabled = false;
-        //Phys
-        buildPhys.IsChecked = false;
-        legacyCompileColMesh.IsChecked = false;
-        //Vis
-        buildVis.IsChecked = false;
-        //Nav
-        buildNav.IsChecked = false;
-        if (gridNav.IsEnabled)
-        {
-            gridNav.IsChecked = false;
-        }
-        navDbg.IsChecked = false;
-        //Steam Audio
-        saReverb.IsChecked = false;
-        baPaths.IsChecked = false;
-        bakeCustom.IsChecked = false; //yet
-        //Extra
-        vconPrint.IsChecked = false;
-        vprofPrint.IsChecked = false;
-        logPrint.IsChecked = false;
-        dangerMode.IsChecked = false;
+        toggle.Name = option.Id;
+        toggle.IsChecked = (bool)values[option.Id];
+        toggle.IsCheckedChanged += (_, _) => OnOptionChanged(option, toggle.IsChecked == true);
+        ToolTip.SetTip(toggle, option.Help);
+        ToolTip.SetShowOnDisabled(toggle, true);
+        optionControls[option.Id] = toggle;
+        return toggle;
     }
 
-    private void PresetCustom_Click(object? sender, RoutedEventArgs e)
+    private void OnOptionChanged(CompileOption option, object value)
     {
-        //World
-        buildworld.IsChecked = true;
-        entsOnly.IsChecked = false;
-        settlephys.IsChecked = true;
-        debugVisGeo.IsChecked = false;
-        onlyBaseTileMesh.IsChecked = false;
-        builddynamicsurfaceeffects.IsChecked = true;
-        buildDeformables.IsChecked = false;
-        //Baked Lighting
-        genLightmaps.IsEnabled = true;
-        genLightmaps.IsChecked = true;
-        cpu.IsChecked = false;
-        nolightmaps.IsChecked = false;
-        lightmapres.SelectedIndex = 3;
-        lightmapquality.SelectedIndex = 1;
-        vrad3LargeSize.IsChecked = true;
-        compression.IsChecked = true;
-        noiseremoval.IsChecked = true;
-        noLightCalc.IsChecked = false;
-        useDeterCharts.IsChecked = false;
-        writeDebugPT.IsChecked = false;
-        //Phys
-        buildPhys.IsChecked = true;
-        legacyCompileColMesh.IsChecked = false;
-        //Vis
-        buildVis.IsChecked = true;
-        //Nav
-        buildNav.IsChecked = true;
-        if (gridNav.IsEnabled)
+        if (showingValues)
         {
-            gridNav.IsChecked = true;
+            return;
         }
-        navDbg.IsChecked = false;
-        //Steam Audio
-        saReverb.IsChecked = true;
-        baPaths.IsChecked = true;
-        bakeCustom.IsChecked = false;
-        //Extra
-        vconPrint.IsChecked = true;
-        vprofPrint.IsChecked = true;
-        logPrint.IsChecked = true;
-        dangerMode.IsChecked = false;
+
+        values[option.Id] = value;
+
+        if (!applyingPreset)
+        {
+            SelectMatchingPreset();
+            UpdateStages();
+        }
+
+        UpdateArgLabel();
+    }
+
+    // Sets an option and moves its control to the value
+    private void SetValue(string id, object value)
+    {
+        values[id] = value;
+        showingValues = true;
+
+        switch (optionControls.GetValueOrDefault(id))
+        {
+            case ToggleButton toggle:
+                toggle.IsChecked = (bool)value;
+                break;
+            case ListBox list:
+                list.SelectedItem = value;
+                break;
+            case NumericUpDown number:
+                number.Value = (int)value;
+                break;
+        }
+
+        showingValues = false;
+    }
+
+    private void OnPresetChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (selectingPreset || presetList.SelectedIndex < 0)
+        {
+            UpdateStages();
+            return;
+        }
+
+        var preset = AllPresets[presetList.SelectedIndex];
+        applyingPreset = true;
+
+        // options the game doesn't have, like grid nav outside Dota, are left out
+        foreach (var (id, value) in preset.Values.Where(v => values.ContainsKey(v.Key)))
+        {
+            SetValue(id, value);
+        }
+
+        // picking Custom straight from Entities only lets the stages be turned back on
+        if (preset == CompileOptions.Custom)
+        {
+            SetValue(CompileOptions.EntitiesOnly.Id, false);
+        }
+
+        applyingPreset = false;
+        UpdateStages();
+        UpdateArgLabel();
+    }
+
+    // Moves the preset list to the preset the options match, or to Custom when they match none
+    private void SelectMatchingPreset()
+    {
+        var match = Array.FindIndex(AllPresets, preset => preset != CompileOptions.Custom && preset.Values.All(v => !values.TryGetValue(v.Key, out var value) || Equals(value, v.Value)));
+
+        selectingPreset = true;
+        presetList.SelectedIndex = match >= 0 ? match : AllPresets.Length - 1;
+        selectingPreset = false;
+    }
+
+    // Greys out the options of a group that's switched off, and every stage while Entities only is picked
+    private void UpdateStages()
+    {
+        var options = new OptionValues(values, game);
+
+        foreach (var (group, card, panel) in cards)
+        {
+            card.IsEnabled = !(group.IsStage && options.On(CompileOptions.EntitiesOnly.Id));
+
+            if (panel != null && group.Switch is { } toggle)
+            {
+                panel.IsEnabled = options.On(toggle.Id);
+            }
+        }
+
+        presetNote.Text = presetList.SelectedIndex >= 0 ? AllPresets[presetList.SelectedIndex].Description : null;
     }
 
     private readonly Dictionary<string, string> _helpText = new Dictionary<string, string>
     {
-        {"labelThreads", "Amount of CPU threads used by the compiler."},
         {"labelCancel", "Cancel build."},
         {"labelCustomPath", "Override game path."},
         {"labelgamestatus", "Current game status. Game executable must be present."},
@@ -1006,44 +797,6 @@ public partial class MainWindow : Window
         {"labeloverrideoutput", "Override map vpk output path."},
         {"labelopenvmap", "Open .vmap file."},
         {"labelCompile", "Begin map compilation."},
-        {"labelBuildWorld", "Build world."},
-        {"labelEntsOnly", "Compile only entities. Useful for testing small changes."},
-        {"labelSettlePhys", "Pre-Settle physics objects."},
-        {"labelDebugVisGeo", "Debug VIS Geometry."},
-        {"labelOnlyBaseTileMesh", "Only base Tile Mesh geometry."},
-        {"labelDynamicSurfaceEffects", "Build world dynamic surface effects. Unknown."},
-        {"labelDeformable", "Build deformable geometry. Unknown."},
-        {"labelgenLightmaps", "Bake lightmaps. GPU with RT support required."},
-        {"labellightmapres", "Lightmap resolution. 1024 - Standard, 2048 - Final, 8192 - Shipping / Final."},
-        {"labellightmapquality", "Lightmap quality."},
-        {"labelgenLightmapsAlyx", "Bake lightmaps. Uses CPU for compilation."},
-        {"labelCPUcompile", "Use CPU for lightmap compilation. Removed in CS2 after Oct 3, 2024."},
-        {"labelCompression", "Enable/Disable lightmap compression."},
-        {"labelnoiseremoval", "Enable/Disable lightmap denoising."},
-        {"labelnoLightCalc", "Disable lighting calculations (useful for debugging texel density/chart allocation)."},
-        {"labeluseDeterCharts", "Use Deterministic lightmap charts during bake."},
-        {"labellargesize", "Make larger VRAD3 blocks at the cost of higher VRAM usage."},
-        {"labelwriteDebugPT", "Write debug Path Trace scene info into a file."},
-        {"labelbuildPhys", "Build collision physics mesh."},
-        {"labellegacyCompileColMesh", "Build legacy collision physics mesh."},
-        {"labelbuildVis", "Build visibility for optimization. Must be set to On in shipping maps."},
-        {"labelbuildNav", "Build navigation mesh for NPCs / CS Bots."},
-        {"labelgridNav", "Build grid navigation mesh for Dota NPCs."},
-        {"labelnavDbg", "Save nav debug stages to file."},
-        {"labelsaReverb", "Build Steam Audio reverb data."},
-        {"labelsaPaths", "Build Steam Audio pathing data."},
-        {"labelsaThreads", "CPU threads used for Steam Audio build."},
-        {"labelbakeCustom", "Build Steam Audio custom data (occlusions and materials)."},
-        {"labelvconPrint", "Print resourcecompiler data to VConsole (Default port 29000)"},
-        {"labelvprofPrint", "Print VProf stats at the end of compilation."},
-        {"labellogPrint", "Save resourcecompiler log to console.log in game/mod."},
-        {"labelfullbuild", "Standard compile of all map components"},
-        {"labelfastbuild", "Build world, phys or nav but no vis or lighting"},
-        {"labelfinalbuild", "Build everything, including final quality lighting"},
-        {"labelentsonly", "Build Entities. Nothing else!"},
-        {"labelcustom", "Custom"},
-        {"labeldangerMode", "Ignore Schema mismatches."},
-        //{"labelcompilestatus", "Compilation status."},
     };
 
     /// <summary>Every control tagged with a help text shows it as a tooltip, disabled ones too so they still say what they are.</summary>
