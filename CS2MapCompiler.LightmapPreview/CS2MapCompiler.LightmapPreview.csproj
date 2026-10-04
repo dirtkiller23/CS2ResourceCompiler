@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Description>A live view of the lightmap vrad3 is baking on the GPU, read out of the running vrad3 process.</Description>
+    <AssemblyName>CS2MapCompiler.LightmapPreview</AssemblyName>
+    <RootNamespace>CS2MapCompiler.LightmapPreview</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Iced" Version="1.21.0" />
+    <PackageReference Include="TinyEXR.NET" Version="1.2.0" />
+  </ItemGroup>
+</Project>

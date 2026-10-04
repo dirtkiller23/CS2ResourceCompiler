@@ -17,7 +17,7 @@ using Microsoft.Win32;
 
 namespace CS2MapCompiler;
 
-[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "the compile process is disposed as soon as it exits")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable", Justification = "the compile process is disposed as soon as it exits, and the lightmap preview when the window closes")]
 public partial class MainWindow : Window
 {
     private string? cs2dir;
@@ -40,6 +40,8 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<LogLine> logLines = [];
     private readonly ConcurrentQueue<LogLine> pendingLines = new();
     private ScrollViewer? logScroller;
+
+    private LightmapPreviewController? lightmapPreview;
 
     public MainWindow()
     {
@@ -69,6 +71,13 @@ public partial class MainWindow : Window
         UpdateArgLabel();
 
         Loaded += Form1_Load;
+        Closed += (_, _) =>
+        {
+            if (OperatingSystem.IsWindows())
+            {
+                lightmapPreview?.Dispose();
+            }
+        };
     }
 
     private static string? GetCS2Dir()
@@ -472,6 +481,12 @@ public partial class MainWindow : Window
             process.Start();
             Log("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler + " " + arg + "\nTime: " + DateTime.Now + "\n", LogKind.App);
 
+            if (OperatingSystem.IsWindows() && BakesLightmapsOnGpu() && Vrad3Folder() is { } vrad3Folder)
+            {
+                lightmapPreview ??= new LightmapPreviewController(this, message => Log("(CS2MapCompiler) " + message + "\n", LogKind.App));
+                lightmapPreview.Start(process.Id, vrad3Folder);
+            }
+
             //* Read both outputs asynchronously, line by line, into the log
 
             process.BeginOutputReadLine();
@@ -491,6 +506,11 @@ public partial class MainWindow : Window
             process.Dispose();
             process = null;
             button1.IsEnabled = true;
+
+            if (OperatingSystem.IsWindows())
+            {
+                lightmapPreview?.Stop();
+            }
         }
 
         if (cancelled)
@@ -501,6 +521,34 @@ public partial class MainWindow : Window
 
         Log("(CS2MapCompiler) Compile completed! - " + DateTime.Now + (exitCode == 0 ? "" : $" (exit code {exitCode})") + "\n", LogKind.App);
         statusLabel.Text = (exitCode == 0 ? "Compile completed" : $"Compile exited with code {exitCode}") + $" in {stopwatch.Elapsed:hh\\:mm\\:ss}";
+    }
+
+    // The lightmap preview only works with GPU bakes
+    private bool BakesLightmapsOnGpu()
+    {
+        return genLightmaps.IsChecked == true && cpu.IsChecked != true && !oldsource2pre2020;
+    }
+
+    // For a map in content\<addons>\<addon> this is game\<addons>\<addon>\_vrad3, and null for maps outside an addon
+    private string? Vrad3Folder()
+    {
+        if (cs2dir == null || mappath == null)
+        {
+            return null;
+        }
+
+        // content\csgo_addons\<addon>\maps\...\<map>.vmap
+        for (var folder = Directory.GetParent(mappath); folder?.Parent?.Parent != null; folder = folder.Parent)
+        {
+            if (folder.Parent.Name.EndsWith("_addons", StringComparison.OrdinalIgnoreCase) && folder.Parent.Parent.Name.Equals("content", StringComparison.OrdinalIgnoreCase))
+            {
+                // cs2dir is game\bin\win64
+                var game = Directory.GetParent(cs2dir)!.Parent!.FullName;
+                return Path.Combine(game, folder.Parent.Name, folder.Name, "_vrad3");
+            }
+        }
+
+        return null;
     }
 
     private void OnCompilerOutput(object sender, DataReceivedEventArgs e)

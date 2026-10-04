@@ -31,6 +31,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CS2MapCompiler.LightmapPreview\CS2MapCompiler.LightmapPreview.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <!-- the window icon, the exe icon above is only used by Windows -->
     <AvaloniaResource Include="assets\icon.ico" />
     <AvaloniaResource Include="assets\buttons\*.png" />

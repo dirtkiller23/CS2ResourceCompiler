@@ -26,6 +26,9 @@ public static class Program
             .WithDeveloperTools()
 #endif
             .WithInterFont()
+            // Skia only keeps about 28 MB of textures on the GPU by default, and an 8192x8192 lightmap preview is 256 MB plus its
+            // mipmaps, so without this it gets uploaded again on every frame and panning and zooming crawl
+            .With(new SkiaOptions { MaxGpuResourceSizeBytes = 512L * 1024 * 1024 })
             .LogToTrace();
     }
 }
