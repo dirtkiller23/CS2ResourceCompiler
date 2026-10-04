@@ -481,6 +481,18 @@ public partial class MainWindow : Window
             process.Start();
             Log("(CS2MapCompiler) Compile started with parameters:\n " + resourcecompiler + " " + arg + "\nTime: " + DateTime.Now + "\n", LogKind.App);
 
+            if (OperatingSystem.IsWindows())
+            {
+                try
+                {
+                    CompilerJob.Add(process);
+                }
+                catch (Win32Exception exception)
+                {
+                    Log("(CS2MapCompiler) resourcecompiler will keep running if the app closes during the compile: " + exception.Message + "\n", LogKind.Error);
+                }
+            }
+
             if (OperatingSystem.IsWindows() && BakesLightmapsOnGpu() && Vrad3Folder() is { } vrad3Folder)
             {
                 lightmapPreview ??= new LightmapPreviewController(this, message => Log("(CS2MapCompiler) " + message + "\n", LogKind.App));
