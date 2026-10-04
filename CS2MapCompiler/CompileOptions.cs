@@ -231,13 +231,16 @@ internal static class CompileOptions
     // Options a preset leaves out keep their value, so the Compiler card is never touched
     public static readonly Preset[] Presets =
     [
-        new("Fast", "Build the world, physics and nav, without vis, lighting or audio", "The world, physics and nav, without vis, lighting or audio",
+        new("Fast", "Only meant for quickly checking things that don't depend on graphics fidelity.", "Build the world and physics, without vis, nav, lighting or audio",
             Values(("entitiesOnly", false), ("physics", true), ("lighting", false), ("visibility", false), ("navigation", true), ("gridNav", true), ("steamAudio", false))),
-        new("Full", "Standard compile of all map components", "Everything, with standard quality lighting",
-            Values(("entitiesOnly", false), ("physics", true), ("lighting", true), ("resolution", "1024"), ("quality", "Standard"), ("visibility", true), ("navigation", true), ("gridNav", true), ("steamAudio", true), ("reverb", true), ("paths", true))),
-        new("Final", "Build everything, including final quality lighting", "Everything, with final quality lighting, for maps you ship",
-            Values(("entitiesOnly", false), ("physics", true), ("lighting", true), ("resolution", "2048"), ("quality", "Final"), ("visibility", true), ("navigation", true), ("gridNav", true), ("steamAudio", true), ("reverb", true), ("paths", true))),
-        new("Entities only", "Rebuild only the entities, skipping every other stage", "Only the entities are rebuilt, every other stage is skipped",
+
+        new("Full", "Decent for smaller maps, or for checking a bigger map in game or for a quick test.", "Everything, with standard quality lighting",
+            Values(("entitiesOnly", false), ("physics", true), ("lighting", true), ("resolution", "2048"), ("quality", "Standard"), ("visibility", true), ("navigation", true), ("gridNav", true), ("steamAudio", true), ("reverb", true), ("paths", true))),
+
+        new("Final", "Best quality lighting, especially important for medium and big sized levels like a CS2 5V5 level.", "Everything, with final quality lighting, for maps you ship",
+            Values(("entitiesOnly", false), ("physics", true), ("lighting", true), ("resolution", "8192"), ("quality", "Final"), ("visibility", true), ("navigation", true), ("gridNav", true), ("steamAudio", true), ("reverb", true), ("paths", true))),
+
+        new("Entities only", "Will rewrite the entity lumps in the map with new ones, without touching anything else, works with mesh entities too.", "Only the entities are rebuilt, every other stage is skipped",
             Values(("entitiesOnly", true), ("physics", false), ("lighting", false), ("visibility", false), ("navigation", false), ("gridNav", false), ("steamAudio", false))),
     ];
 
