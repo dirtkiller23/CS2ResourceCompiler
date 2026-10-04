@@ -121,11 +121,11 @@ internal static class CompileOptions
             Switch = new() { Id = "world", Help = "Build world.", Default = true, Flags = o => o.On() && !o.On("entitiesOnly") ? ["-world"] : [] },
             Options =
             [
-                new() { Id = "settlePhysics", Label = "Pre-settle physics objects", Help = "Pre-settle physics objects.", Default = true, Flags = o => o.On() ? [] : ["-nosettle"] },
-                new() { Id = "surfaceEffects", Label = "Dynamic surface effects", Help = "Build the world's dynamic surface effects. Turning this off skips them with -skipauxfiles.", Default = true, Flags = o => o.On() ? [] : ["-skipauxfiles"] },
-                new() { Id = "deformables", Label = "Deformable geometry", Help = "Force deformable geometry to be built, with -deformables forced.", Default = false, Flags = o => o.On() ? ["-deformables forced"] : [] },
+                new() { Id = "settlePhysics", Label = "Pre-settle physics objects", Help = "Runs physics on physics objects so they don't move when the map loads.", Default = true, Flags = o => o.On() ? [] : ["-nosettle"] },
+                new() { Id = "surfaceEffects", Label = "Dynamic surface effects", Help = "Build the world's dynamic surface effects.", Default = true, Flags = o => o.On() ? [] : ["-skipauxfiles"] },
+                new() { Id = "deformables", Label = "Deformable geometry", Help = "Force deformable geometry to be built.", Default = false, Flags = o => o.On() ? ["-deformables forced"] : [] },
                 new() { Id = "debugVisGeometry", Label = "Debug vis geometry", Help = "Debug VIS Geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-debugvisgeo"] : [] },
-                new() { Id = "baseTileMeshOnly", Label = "Only base tile mesh geometry", Help = "Only base Tile Mesh geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-tileMeshBaseGeometry"] : [] },
+                new() { Id = "baseTileMeshOnly", Label = "Only base tile mesh geometry", Help = "Only compile base Tile Mesh geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-tileMeshBaseGeometry"] : [] },
             ],
         },
         new()
@@ -153,7 +153,7 @@ internal static class CompileOptions
             Options =
             [
                 new() { Id = "gridNav", Label = "Grid nav", Help = "Build grid navigation mesh for Dota NPCs.", Default = false, Available = g => g == Game.Dota2, Flags = o => o.On() ? ["-gridnav"] : [] },
-                new() { Id = "navDebug", Label = "Save debug stages to file", Help = "Save nav debug stages to file.", Default = false, Folded = true, Flags = o => o.On() ? ["-navdbg"] : [] },
+                new() { Id = "navDebug", Label = "Save debug stages to file", Help = "Saves nav debug stages to a file.", Default = false, Folded = true, Flags = o => o.On() ? ["-navdbg"] : [] },
             ],
         },
         new()
@@ -176,14 +176,14 @@ internal static class CompileOptions
                 new() { Id = "resolution", Label = "Resolution", Help = "Lightmap resolution. 1024 - Standard, 2048 - Final, 8192 - Shipping / Final.", Kind = OptionKind.Choice, Choices = ["512", "1024", "2048", "4096", "8192"], Default = "1024", Flags = o => [$"-lightmapMaxResolution {o.Choice()}"] },
                 // vrad3 is given the quality's index
                 new() { Id = "quality", Label = "Quality", Help = "Lightmap quality.", Kind = OptionKind.Choice, Choices = ["Fast", "Standard", "Final"], Default = "Standard", Flags = o => [$"-lightmapVRadQuality {Array.IndexOf(["Fast", "Standard", "Final"], o.Choice())}"] },
-                new() { Id = "noiseRemoval", Label = "Noise removal", Description = "Filters the noise out of the bake", Help = "Enable/Disable lightmap denoising.", Default = true, GameDefault = g => g is Game.Dota2 or Game.DeskJob ? false : null, Flags = o => o.On() ? [] : ["-lightmapDisableFiltering"] },
+                new() { Id = "noiseRemoval", Label = "Noise removal", Description = "Filters the path tracing noise out of the bake", Help = "Enable/Disable lightmap denoising.", Default = true, GameDefault = g => g is Game.Dota2 or Game.DeskJob ? false : null, Flags = o => o.On() ? [] : ["-lightmapDisableFiltering"] },
                 // older games take the setting as a number either way
                 new() { Id = "compression", Label = "Compression", Description = "Smaller lightmaps, at a slight cost in quality", Help = "Enable/Disable lightmap compression.", Default = true, Flags = o => o.Game.IsLegacy() ? [$"-lightmapCompressionDisabled {(o.On() ? 0 : 1)}"] : o.On() ? [] : ["-lightmapCompressionDisabled"] },
                 new() { Id = "largeBlocks", Label = "Large bake blocks", Description = "Bakes in fewer, bigger blocks, using more VRAM", Help = "Make larger VRAD3 blocks at the cost of higher VRAM usage.", Default = true, Available = g => !g.IsLegacy(), Flags = o => o.On() ? ["-vrad3LargeBlockSize"] : [] },
                 // Valve removed baking on the CPU from CS2 in October 2024, and older games only bake on the CPU anyway
-                new() { Id = "cpu", Label = "Bake on the CPU", Help = "Bake lightmaps on the CPU, for GPUs without ray tracing. Much slower.", Default = false, Available = g => !g.IsLegacy() && g != Game.Cs2, Flags = o => o.On() ? ["-lightmapcpu"] : [] },
+                new() { Id = "cpu", Label = "Bake on the CPU", Help = "Bake lightmaps on the CPU, for GPUs without ray tracing. Much slower and only supported in some (older) games.", Default = false, Available = g => !g.IsLegacy() && g != Game.Cs2, Flags = o => o.On() ? ["-lightmapcpu"] : [] },
                 new() { Id = "disableLighting", Label = "Disable lighting calculations", Help = "Disable lighting calculations (useful for debugging texel density/chart allocation).", Default = false, Folded = true, Flags = o => o.On() ? ["-disableLightingCalculations"] : [] },
-                new() { Id = "deterministicCharts", Label = "Deterministic charting", Help = "Use Deterministic lightmap charts during bake.", Default = false, Folded = true, Flags = o => o.On() ? ["-lightmapDeterministicCharts"] : [] },
+                new() { Id = "deterministicCharts", Label = "Deterministic charting", Help = "Use Deterministic lightmap charts during bake (the lightmap uvs will be the same given same input geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-lightmapDeterministicCharts"] : [] },
                 new() { Id = "debugPathTrace", Label = "Write debug path trace info", Help = "Write debug Path Trace scene info into a file.", Default = false, Folded = true, Flags = o => o.On() ? ["-write_debug_path_trace_scene_info"] : [] },
             ],
         },
