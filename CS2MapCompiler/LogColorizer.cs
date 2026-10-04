@@ -4,16 +4,34 @@ using AvaloniaEdit.Rendering;
 
 namespace CS2MapCompiler;
 
-// Colours each line of the compile log by its kind. The log adds a kind for each line it appends, so line N's kind is kinds[N - 1]
-internal sealed class LogColorizer(List<LogKind> kinds, Func<LogKind, IBrush?> brush) : DocumentColorizingTransformer
+// Colours the runs of the compile log. The log only grows at its end, so its spans stay in order and the first one on a
+// line can be found by bisecting
+internal sealed class LogColorizer(List<LogSpan> spans, Func<LogSpan, IBrush?> brush) : DocumentColorizingTransformer
 {
     protected override void ColorizeLine(DocumentLine line)
     {
-        if (line.LineNumber > kinds.Count || brush(kinds[line.LineNumber - 1]) is not { } foreground)
+        int low = 0, high = spans.Count;
+
+        while (low < high)
         {
-            return;
+            var middle = (low + high) / 2;
+
+            if (spans[middle].End <= line.Offset)
+            {
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle;
+            }
         }
 
-        ChangeLinePart(line.Offset, line.EndOffset, element => element.TextRunProperties.SetForegroundBrush(foreground));
+        for (var i = low; i < spans.Count && spans[i].Offset < line.EndOffset; i++)
+        {
+            if (brush(spans[i]) is { } foreground)
+            {
+                ChangeLinePart(Math.Max(spans[i].Offset, line.Offset), Math.Min(spans[i].End, line.EndOffset), element => element.TextRunProperties.SetForegroundBrush(foreground));
+            }
+        }
     }
 }

@@ -337,8 +337,8 @@
                             <!-- read only text, selected and copied like in any editor, its lines coloured by what they report -->
                             <Border Background="{DynamicResource FieldBrush}" CornerRadius="4" ClipToBounds="True">
                                 <ae:TextEditor Name="logEditor" IsReadOnly="True" WordWrap="True" ShowLineNumbers="False" Padding="8,4"
-                                               FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="12"
-                                               Background="Transparent" Foreground="{DynamicResource ContrastSoftBrush}"
+                                               FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="13"
+                                               Background="Transparent" Foreground="{DynamicResource LogTextBrush}"
                                                HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                                     <ae:TextEditor.ContextMenu>
                                         <ContextMenu>

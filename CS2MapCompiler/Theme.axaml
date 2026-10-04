@@ -22,6 +22,8 @@
             <Color x:Key="OutlineColor">#8FA3B6</Color>
             <!-- headings in rendered descriptions, the blue Steam gives them -->
             <Color x:Key="HeadingColor">#1B6AA8</Color>
+            <!-- the compile log's text, dark like a light terminal's, so the compiler's colours read against it -->
+            <Color x:Key="LogTextColor">#333333</Color>
         </ResourceDictionary>
         <ResourceDictionary x:Key="Dark">
             <Color x:Key="AppColor">#1A1B1E</Color>
@@ -43,6 +45,8 @@
             <Color x:Key="OutlineColor">#3E4B66</Color>
             <!-- headings in rendered descriptions, the blue Steam gives them -->
             <Color x:Key="HeadingColor">#67C1F5</Color>
+            <!-- the compile log's text, the soft contrast it had before, which reads on the dark log as it is -->
+            <Color x:Key="LogTextColor">#C4C7CE</Color>
         </ResourceDictionary>
     </ResourceDictionary.ThemeDictionaries>
 
@@ -65,6 +69,7 @@
     <SolidColorBrush x:Key="PopupBrush" Color="{DynamicResource PopupColor}" />
     <SolidColorBrush x:Key="OutlineBrush" Color="{DynamicResource OutlineColor}" />
     <SolidColorBrush x:Key="HeadingBrush" Color="{DynamicResource HeadingColor}" />
+    <SolidColorBrush x:Key="LogTextBrush" Color="{DynamicResource LogTextColor}" />
     <!-- the stars of a rating: the accent, which each window boosts off its background, see WindowAccent -->
     <SolidColorBrush x:Key="StarBrush" Color="{DynamicResource AccentColor}" />
     <!-- text on the accent, which each window sets to black or white by its own accent, see WindowAccent -->
@@ -86,7 +91,8 @@
     <StaticResource x:Key="ButtonBackgroundDisabled" ResourceKey="FieldBrush" />
     <StaticResource x:Key="ToggleButtonBackground" ResourceKey="ControlBrush" />
     <StaticResource x:Key="ToggleButtonBackgroundPointerOver" ResourceKey="ControlHoverBrush" />
-    <StaticResource x:Key="ToggleButtonBackgroundPressed" ResourceKey="AccentBrush" />
+    <StaticResource x:Key="ToggleButtonBackgroundPressed" ResourceKey="AccentBrush" />
+
     <!-- a checked toggle keeps the accent under the pointer, instead of Fluent brightening it with the system accent -->
     <StaticResource x:Key="ToggleButtonBackgroundChecked" ResourceKey="AccentBrush" />
     <StaticResource x:Key="ToggleButtonBackgroundCheckedPointerOver" ResourceKey="AccentBrush" />

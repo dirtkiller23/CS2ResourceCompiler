@@ -260,7 +260,7 @@ internal static class CompileOptions
     {
         var o = new OptionValues(values, game);
         var input = Path.GetExtension(mapPath)?.Equals(".txt", StringComparison.OrdinalIgnoreCase) == true ? "-filelist" : "-i";
-        List<string> args = [$"-threads {o.Number("threads")}", "-fshallow", "-maxtextureres 256", "-dxlevel 110", "-quiet", "-unbufferedio", input, $"\"{mapPath}\"", "-noassert"];
+        List<string> args = [$"-threads {o.Number("threads")}", "-fshallow", "-maxtextureres 256", "-dxlevel 110", "-quiet", "-html", "-unbufferedio", input, $"\"{mapPath}\"", "-noassert"];
 
         args.AddRange(EntitiesOnly.Flags(o.For(EntitiesOnly)));
 

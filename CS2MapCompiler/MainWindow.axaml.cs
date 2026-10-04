@@ -15,11 +15,14 @@ using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Immutable;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Microsoft.Win32;
+using Wacton.Unicolour;
 
 namespace CS2MapCompiler;
 
@@ -44,8 +47,11 @@ public partial class MainWindow : Window
     /// <summary>The compile log, and the lines printed since it was last shown, which arrive from the compiler's threads.</summary>
     private readonly ConcurrentQueue<LogLine> pendingLines = new();
 
-    // the kind of each line in the log, which colours it
-    private readonly List<LogKind> logKinds = [];
+    // the coloured runs of the log, by where they are in it
+    private readonly List<LogSpan> logSpans = [];
+
+    // whether nothing has been logged yet, so the next line needs no line break before it
+    private bool logEmpty = true;
 
     // whether the log keeps its newest line in view, until it's scrolled away from the bottom, and again once it's scrolled back
     private bool followLog = true;
@@ -56,13 +62,13 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        logEditor.TextArea.TextView.LineTransformers.Add(new LogColorizer(logKinds, kind => kind switch
+        logEditor.TextArea.TextView.LineTransformers.Add(new LogColorizer(logSpans, span => span.Kind switch
         {
-            LogKind.Warning => Brush("WarningBrush"),
             LogKind.Error => Brush("ErrorTextBrush"),
             LogKind.App => Brush("HeadingBrush"),
-            _ => null,
+            _ => CompilerBrush(span.Color),
         }));
+        ActualThemeVariantChanged += (_, _) => logEditor.TextArea.TextView.Redraw();
         logEditor.TextArea.SelectionBrush = Brush("AccentSoftBrush");
         logEditor.TextArea.SelectionForeground = null;
         // it's read only, so there's nothing to type at
@@ -277,8 +283,6 @@ public partial class MainWindow : Window
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
             process.StartInfo.CreateNoWindow = true;
-            process.OutputDataReceived += OnCompilerOutput;
-            process.ErrorDataReceived += OnCompilerOutput;
 
             //* Start process
 
@@ -303,12 +307,7 @@ public partial class MainWindow : Window
                 lightmapPreview.Start(process.Id, vrad3Folder);
             }
 
-            //* Read both outputs asynchronously, line by line, into the log
-
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-
-            await process.WaitForExitAsync();
+            await Task.WhenAll(ReadCompilerOutput(process.StandardOutput), ReadCompilerOutput(process.StandardError), process.WaitForExitAsync());
             exitCode = process.ExitCode;
         }
         catch (Exception exception) when (exception is Win32Exception or InvalidOperationException)
@@ -368,11 +367,28 @@ public partial class MainWindow : Window
         return null;
     }
 
-    private void OnCompilerOutput(object sender, DataReceivedEventArgs e)
+    // With -html resourcecompiler ends its lines with <br/> instead of newlines, so its output is read as it comes and split
+    // there. That happens off the UI thread, which picks the lines up from the queue
+    private async Task ReadCompilerOutput(StreamReader reader)
     {
-        if (e.Data != null)
+        var buffer = new char[4096];
+        var unfinished = "";
+        int read;
+
+        while ((read = await reader.ReadAsync(buffer).ConfigureAwait(false)) > 0)
         {
-            pendingLines.Enqueue(new LogLine(e.Data, LogLine.Classify(e.Data)));
+            var lines = (unfinished + new string(buffer, 0, read)).Split(["<br/>", "\r\n", "\n"], StringSplitOptions.None);
+            unfinished = lines[^1];
+
+            foreach (var line in lines[..^1])
+            {
+                pendingLines.Enqueue(LogLine.FromHtml(line));
+            }
+        }
+
+        if (unfinished.Length > 0)
+        {
+            pendingLines.Enqueue(LogLine.FromHtml(unfinished));
         }
     }
 
@@ -848,7 +864,7 @@ public partial class MainWindow : Window
     {
         foreach (var line in text.Split('\n'))
         {
-            pendingLines.Enqueue(new LogLine(line, kind));
+            pendingLines.Enqueue(LogLine.App(line, kind));
         }
     }
 
@@ -856,6 +872,22 @@ public partial class MainWindow : Window
     private IBrush? Brush(string key)
     {
         return this.TryFindResource(key, ActualThemeVariant, out var brush) ? brush as IBrush : null;
+    }
+
+    // resourcecompiler's colours are made for a dark console, so the light theme remaps them in OKLCH, whose lightness is how
+    // light a colour looks. A colour stands out by its chroma, which sRGB only has room for at middling lightness, so colours
+    // are darkened no further than that. Greys have no chroma, they stand out by being brighter than the text, which on a
+    // light background means darker, so their lightness is mirrored
+    private ImmutableSolidColorBrush CompilerBrush(Color color)
+    {
+        if (ActualThemeVariant == ThemeVariant.Light)
+        {
+            var (lightness, chroma, hue) = new Unicolour(ColourSpace.Rgb255, color.R, color.G, color.B).Oklch;
+            lightness = chroma < 0.03 ? 1 - lightness : Math.Min(lightness, 0.6);
+            color = Color.Parse(new Unicolour(ColourSpace.Oklch, lightness, chroma, hue).MapToRgbGamut().Hex);
+        }
+
+        return new ImmutableSolidColorBrush(color);
     }
 
     // Shows the lines printed since the last time, following them down when the log was already at its end
@@ -870,8 +902,12 @@ public partial class MainWindow : Window
 
         while (pendingLines.TryDequeue(out var line))
         {
-            text.Append(logKinds.Count == 0 ? "" : "\n").Append(line.Text);
-            logKinds.Add(line.Kind);
+            text.Append(logEmpty ? "" : "\n");
+            logEmpty = false;
+
+            var start = logEditor.Document.TextLength + text.Length;
+            logSpans.AddRange(line.Spans.Select(span => span with { Offset = start + span.Offset }));
+            text.Append(line.Text);
         }
 
         logEditor.Document.Insert(logEditor.Document.TextLength, text.ToString());
@@ -923,7 +959,8 @@ public partial class MainWindow : Window
     private void OnClearLog(object? sender, RoutedEventArgs e)
     {
         logEditor.Document.Text = "";
-        logKinds.Clear();
+        logSpans.Clear();
+        logEmpty = true;
         followLog = true;
     }
 }
