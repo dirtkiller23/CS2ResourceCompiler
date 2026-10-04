@@ -3,6 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="using:CS2MapCompiler"
+        xmlns:ae="using:AvaloniaEdit"
         mc:Ignorable="d" d:DesignWidth="1280" d:DesignHeight="900"
         x:Class="CS2MapCompiler.MainWindow"
         Title="CS2 Map Compiler"
@@ -222,32 +223,6 @@
             <Setter Property="Background" Value="{DynamicResource MissingPillBrush}" />
         </Style>
 
-        <!-- the compile log: tight monospaced lines, coloured by what they report -->
-        <Style Selector="ListBox#logList ListBoxItem">
-            <Setter Property="Padding" Value="8,0" />
-            <Setter Property="MinHeight" Value="0" />
-        </Style>
-        <Style Selector="ListBox#logList ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource ControlBrush}" />
-        </Style>
-        <Style Selector="ListBox#logList ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
-            <Setter Property="Background" Value="{DynamicResource AccentSoftBrush}" />
-        </Style>
-        <Style Selector="TextBlock.log">
-            <Setter Property="FontFamily" Value="Cascadia Mono,Consolas,Menlo,monospace" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="TextWrapping" Value="Wrap" />
-            <Setter Property="Foreground" Value="{DynamicResource ContrastSoftBrush}" />
-        </Style>
-        <Style Selector="TextBlock.log.warning">
-            <Setter Property="Foreground" Value="{DynamicResource WarningBrush}" />
-        </Style>
-        <Style Selector="TextBlock.log.error">
-            <Setter Property="Foreground" Value="{DynamicResource ErrorTextBrush}" />
-        </Style>
-        <Style Selector="TextBlock.log.app">
-            <Setter Property="Foreground" Value="{DynamicResource HeadingBrush}" />
-        </Style>
     </Window.Styles>
 
     <Panel>
@@ -354,18 +329,27 @@
                         <DockPanel>
                             <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="4">
-                                    <Button Content="Copy" Click="OnCopyLog" ToolTip.Tip="Copy the selected lines, or the whole log when none are selected" />
+                                    <Button Content="Copy" Click="OnCopyLog" ToolTip.Tip="Copy the selected text, or the whole log when nothing is selected" />
                                     <Button Content="Clear" Click="OnClearLog" />
                                 </StackPanel>
                                 <TextBlock Classes="heading" Text="Compile log" Margin="0" VerticalAlignment="Center" />
                             </DockPanel>
-                            <ListBox Name="logList" SelectionMode="Multiple" Background="{DynamicResource FieldBrush}" CornerRadius="4">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate x:DataType="local:LogLine">
-                                        <TextBlock Classes="log" Classes.warning="{Binding IsWarning}" Classes.error="{Binding IsError}" Classes.app="{Binding IsApp}" Text="{Binding Text}" />
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                            <!-- read only text, selected and copied like in any editor, its lines coloured by what they report -->
+                            <Border Background="{DynamicResource FieldBrush}" CornerRadius="4" ClipToBounds="True">
+                                <ae:TextEditor Name="logEditor" IsReadOnly="True" WordWrap="True" ShowLineNumbers="False" Padding="8,4"
+                                               FontFamily="Cascadia Mono,Consolas,Menlo,monospace" FontSize="12"
+                                               Background="Transparent" Foreground="{DynamicResource ContrastSoftBrush}"
+                                               HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                    <ae:TextEditor.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Copy" InputGesture="Ctrl+C" Click="OnCopySelectedLog" />
+                                            <MenuItem Header="Copy all" Click="OnCopyAllLog" />
+                                            <Separator />
+                                            <MenuItem Header="Select all" InputGesture="Ctrl+A" Click="OnSelectAllLog" />
+                                        </ContextMenu>
+                                    </ae:TextEditor.ContextMenu>
+                                </ae:TextEditor>
+                            </Border>
                         </DockPanel>
                     </Border>
                 </DockPanel>

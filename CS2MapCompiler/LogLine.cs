@@ -19,12 +19,6 @@ public enum LogKind
 /// <summary>A line of the compile log.</summary>
 public sealed record LogLine(string Text, LogKind Kind)
 {
-    public bool IsWarning => Kind == LogKind.Warning;
-
-    public bool IsError => Kind == LogKind.Error;
-
-    public bool IsApp => Kind == LogKind.App;
-
     /// <summary>The kind of a line resourcecompiler printed, by how it starts: its errors and warnings say so up front.</summary>
     public static LogKind Classify(string line)
     {

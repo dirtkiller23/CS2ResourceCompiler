@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -9,9 +10,11 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.LogicalTree;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -39,9 +42,13 @@ public partial class MainWindow : Window
     private bool cancelled;
 
     /// <summary>The compile log, and the lines printed since it was last shown, which arrive from the compiler's threads.</summary>
-    private readonly ObservableCollection<LogLine> logLines = [];
     private readonly ConcurrentQueue<LogLine> pendingLines = new();
-    private ScrollViewer? logScroller;
+
+    // the kind of each line in the log, which colours it
+    private readonly List<LogKind> logKinds = [];
+
+    // whether the log keeps its newest line in view, until it's scrolled away from the bottom, and again once it's scrolled back
+    private bool followLog = true;
 
     private LightmapPreviewController? lightmapPreview;
 
@@ -49,7 +56,26 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
 
-        logList.ItemsSource = logLines;
+        logEditor.TextArea.TextView.LineTransformers.Add(new LogColorizer(logKinds, kind => kind switch
+        {
+            LogKind.Warning => Brush("WarningBrush"),
+            LogKind.Error => Brush("ErrorTextBrush"),
+            LogKind.App => Brush("HeadingBrush"),
+            _ => null,
+        }));
+        logEditor.TextArea.SelectionBrush = Brush("AccentSoftBrush");
+        logEditor.TextArea.SelectionForeground = null;
+        // it's read only, so there's nothing to type at
+        logEditor.TextArea.Caret.CaretBrush = Brushes.Transparent;
+        // an editor lets its text scroll up past its end, a log stops at its last line
+        logEditor.Options.AllowScrollBelowDocument = false;
+        logEditor.Loaded += (_, _) =>
+        {
+            if (logEditor.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault() is { } viewer)
+            {
+                viewer.ScrollChanged += OnLogScrolled;
+            }
+        };
 
         // the compiler prints faster than lines can be shown one by one, so what it printed is shown a few times a second
         new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, (_, _) => FlushLog()).Start();
@@ -826,7 +852,13 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>Shows the lines printed since the last time, following them down when the log was already at its end.</summary>
+    // a brush of the theme, as it is now
+    private IBrush? Brush(string key)
+    {
+        return this.TryFindResource(key, ActualThemeVariant, out var brush) ? brush as IBrush : null;
+    }
+
+    // Shows the lines printed since the last time, following them down when the log was already at its end
     private void FlushLog()
     {
         if (pendingLines.IsEmpty)
@@ -834,33 +866,64 @@ public partial class MainWindow : Window
             return;
         }
 
-        logScroller ??= logList.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-
-        var atEnd = logScroller == null || logScroller.Offset.Y >= logScroller.Extent.Height - logScroller.Viewport.Height - 4;
+        var text = new StringBuilder();
 
         while (pendingLines.TryDequeue(out var line))
         {
-            logLines.Add(line);
+            text.Append(logKinds.Count == 0 ? "" : "\n").Append(line.Text);
+            logKinds.Add(line.Kind);
         }
 
-        if (atEnd)
+        logEditor.Document.Insert(logEditor.Document.TextLength, text.ToString());
+    }
+
+    // Scrolling moves the log only when it's scrolled, so whether it's at the bottom then says whether to follow it. The text
+    // growing or the log resizing leaves it where it is, unless it's following, when it goes to the new bottom. That only comes
+    // once the new lines are laid out, so it lands on the real end
+    private void OnLogScrolled(object? sender, ScrollChangedEventArgs e)
+    {
+        var viewer = (ScrollViewer)sender!;
+        var bottom = Math.Max(0, viewer.Extent.Height - viewer.Viewport.Height);
+
+        if (e.OffsetDelta.Y != 0)
         {
-            logList.ScrollIntoView(logLines.Count - 1);
+            followLog = viewer.Offset.Y >= bottom - 2;
+        }
+        else if (followLog && viewer.Offset.Y < bottom)
+        {
+            viewer.Offset = viewer.Offset.WithY(bottom);
         }
     }
 
+    // The Copy button copies the selected text, or the whole log when nothing is selected
     private async void OnCopyLog(object? sender, RoutedEventArgs e)
     {
-        var lines = logList.SelectedItems is { Count: > 0 } selected ? logLines.Where(selected.Contains) : logLines;
-
-        if (Clipboard is { } clipboard)
+        if (Clipboard is { } clipboard && (logEditor.SelectionLength > 0 ? logEditor.SelectedText : logEditor.Text) is { Length: > 0 } text)
         {
-            await clipboard.SetTextAsync(string.Join(Environment.NewLine, lines.Select(line => line.Text)));
+            await clipboard.SetTextAsync(text);
         }
+    }
+
+    private void OnCopySelectedLog(object? sender, RoutedEventArgs e)
+    {
+        logEditor.Copy();
+    }
+
+    private void OnCopyAllLog(object? sender, RoutedEventArgs e)
+    {
+        logEditor.SelectAll();
+        logEditor.Copy();
+    }
+
+    private void OnSelectAllLog(object? sender, RoutedEventArgs e)
+    {
+        logEditor.SelectAll();
     }
 
     private void OnClearLog(object? sender, RoutedEventArgs e)
     {
-        logLines.Clear();
+        logEditor.Document.Text = "";
+        logKinds.Clear();
+        followLog = true;
     }
 }
