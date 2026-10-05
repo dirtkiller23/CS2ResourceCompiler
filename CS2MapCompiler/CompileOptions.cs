@@ -123,6 +123,9 @@ internal static class CompileOptions
             [
                 new() { Id = "settlePhysics", Label = "Pre-settle physics objects", Help = "Runs physics on physics objects so they don't move when the map loads.", Default = true, Flags = o => o.On() ? [] : ["-nosettle"] },
                 new() { Id = "surfaceEffects", Label = "Dynamic surface effects", Help = "Build the world's dynamic surface effects.", Default = true, Flags = o => o.On() ? [] : ["-skipauxfiles"] },
+                // rebake surface graph option is disabled when surfaceEffects is disabled
+                new() { Id = "rebakeSurfaceGraph", Label = "Rebake Dynamic Surface Effects", Help = "Force surface graph to be rebuilt.", Default = true, Flags = o => o.On() ? ["-rebake_surfacegraph"] : [] },
+                // default option when deformables are off is -deformables none
                 new() { Id = "deformables", Label = "Deformable geometry", Help = "Force deformable geometry to be built.", Default = false, Flags = o => o.On() ? ["-deformables forced"] : [] },
                 new() { Id = "debugVisGeometry", Label = "Debug vis geometry", Help = "Debug VIS Geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-debugvisgeo"] : [] },
                 new() { Id = "baseTileMeshOnly", Label = "Only base tile mesh geometry", Help = "Only compile base Tile Mesh geometry.", Default = false, Folded = true, Flags = o => o.On() ? ["-tileMeshBaseGeometry"] : [] },
@@ -197,6 +200,8 @@ internal static class CompileOptions
                 new() { Id = "reverb", Label = "Reverb", Help = "Build Steam Audio reverb data.", Default = true, GameDefault = g => g == Game.Dota2 ? false : null, Flags = o => o.On() ? ["-sareverb"] : [] },
                 new() { Id = "paths", Label = "Paths", Help = "Build Steam Audio pathing data.", Default = true, GameDefault = g => g == Game.Dota2 ? false : null, Flags = o => o.On() ? ["-sapaths"] : [] },
                 new() { Id = "customData", Label = "Custom data", Help = "Build Steam Audio custom data (occlusions and materials).", Default = false, Available = g => !g.IsLegacy(), Flags = o => o.On() ? ["-sacustomdata", $"-sacustomdata_threads {o.Number("audioThreads")}"] : [] },
+                new() { Id = "strictBakeMode", Label = "Strict Bake Mode", Help = "", Default = false, Available = g => !g.IsLegacy(), Flags = o => o.On() ? ["-sabakestrictmode"] : [] },
+                new() { Id = "steamAudioGPU", Label = "GPU Bake Audio", Help = "", Default = false, Available = g => !g.IsLegacy(), Flags = o => o.On() ? ["-steamaudio_gpu"] : [] },
                 // reverb and paths share one thread count, which older games don't take
                 new() { Id = "audioThreads", Label = "Threads", Help = "CPU threads used for Steam Audio build.", Kind = OptionKind.Threads, Available = g => !g.IsLegacy(), Flags = o => o.On("reverb") || o.On("paths") ? [$"-sareverb_threads {o.Number()}"] : [] },
             ],
