@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Source2MapCompiler/Source2MapCompiler.csproj" />
+  <Project Path="Source2MapCompiler.LightmapPreview/Source2MapCompiler.LightmapPreview.csproj" />
+</Solution>

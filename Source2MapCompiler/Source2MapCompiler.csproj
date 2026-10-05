@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RollForward>LatestMajor</RollForward>
+    <OutputType>WinExe</OutputType>
+    <Description>A GUI for resourcecompiler with the same options as Hammer for compiling maps, plus more.</Description>
+    <AssemblyName>Source2MapCompiler</AssemblyName>
+    <RootNamespace>Source2MapCompiler</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>assets\icon.ico</ApplicationIcon>
+    <!-- one self contained exe with the native libraries unpacked on first run -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishSingleFile Condition="'$(Configuration)' != 'Debug'">true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- CA2007: continuations must stay on the UI thread -->
+    <NoWarn>$(NoWarn);CA2007</NoWarn>
+    <!-- Avalonia renders with SkiaSharp, so its native library must stay in the output -->
+    <UsesSkiaSharp>true</UsesSkiaSharp>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
+    <PackageReference Include="Avalonia.Controls.ColorPicker" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.2" />
+    <PackageReference Include="ValveKeyValue" Version="0.70.0.499" />
+    <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ValveResourceFormat" Version="20.0.6980" />
+    <PackageReference Include="Wacton.Unicolour" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Source2MapCompiler.LightmapPreview\Source2MapCompiler.LightmapPreview.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- the window icon, the exe icon above is only used by Windows -->
+    <AvaloniaResource Include="assets\icon.ico" />
+    <AvaloniaResource Include="assets\buttons\*.png" />
+    <AvaloniaResource Include="assets\*.png" />
+  </ItemGroup>
+</Project>

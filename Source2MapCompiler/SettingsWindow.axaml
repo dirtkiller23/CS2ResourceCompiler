@@ -1,0 +1,46 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="using:Source2MapCompiler"
+        x:Class="Source2MapCompiler.SettingsWindow"
+        Title="Settings"
+        Icon="avares://Source2MapCompiler/assets/icon.ico"
+        Width="560"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBrush}"
+        local:WindowAccent.Color="{DynamicResource AccentColor}">
+    <Panel>
+        <local:DitheredGradient CenterColor="{DynamicResource AppAccentColor}" EdgeColor="{DynamicResource AppColor}" GradientOrigin="90%,0%" />
+
+        <DockPanel Margin="12">
+            <DockPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                <Button DockPanel.Dock="Right" Content="Open folder" Margin="8,0,0,0" Click="OnOpenFolder" />
+                <StackPanel VerticalAlignment="Center">
+                    <SelectableTextBlock Name="FilePath" TextWrapping="Wrap" Foreground="{DynamicResource ContrastSoftBrush}" />
+                    <TextBlock Name="Status" TextWrapping="Wrap" Foreground="{DynamicResource ContrastBrush}" />
+                </StackPanel>
+            </DockPanel>
+
+            <!-- the theme and the accent over it, applied and saved as they are picked -->
+            <Border Background="{DynamicResource ShadeBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="5" Padding="12">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,12,Auto">
+                    <TextBlock Text="Theme" FontWeight="SemiBold" VerticalAlignment="Center" Foreground="{DynamicResource ContrastBrush}" />
+                    <ComboBox Grid.Column="1" Name="ThemeBox" Width="160" SelectionChanged="OnThemeChanged">
+                        <ComboBoxItem Content="System" />
+                        <ComboBoxItem Content="Light" />
+                        <ComboBoxItem Content="Dark" />
+                    </ComboBox>
+                    <StackPanel Grid.Row="2" VerticalAlignment="Center">
+                        <TextBlock Text="Accent" FontWeight="SemiBold" Foreground="{DynamicResource ContrastBrush}" />
+                        <TextBlock Text="The color for the window background gradient and highlights." TextWrapping="Wrap" Foreground="{DynamicResource ContrastSoftBrush}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                        <ColorPicker Name="AccentPicker" Width="96" IsAlphaEnabled="False" IsAlphaVisible="False" ColorChanged="OnAccentChanged" />
+                        <Button Name="AccentReset" Content="Reset" Click="OnAccentReset" ToolTip.Tip="Back to the theme's own accent" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </DockPanel>
+    </Panel>
+</Window>

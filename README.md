@@ -1,7 +1,7 @@
-# CS2 Map Compiler
+# Source2 Map Compiler
 A GUI for resourcecompiler with the same options as Hammer for compiling maps, plus more.
 
-![CS2 Map Compiler](.github/assets/screenshot.png)
+![Source2 Map Compiler](.github/assets/screenshot.png)
 
 # Requirements
 - Any Source 2 game and Workshop Tools installed. (If the application cannot find the game, click Custom Path and select the game's exe.)
