@@ -100,6 +100,7 @@ namespace CS2MapCompiler
             this.statusLabel = new System.Windows.Forms.Label();
             this.dangerMode = new System.Windows.Forms.CheckBox();
             this.buildDeformables = new System.Windows.Forms.CheckBox();
+            this.rebakesurfacegraph = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // timer1
@@ -487,7 +488,7 @@ namespace CS2MapCompiler
             this.CategoryLight.AutoSize = true;
             this.CategoryLight.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.CategoryLight.ForeColor = System.Drawing.Color.Snow;
-            this.CategoryLight.Location = new System.Drawing.Point(220, 138);
+            this.CategoryLight.Location = new System.Drawing.Point(307, 138);
             this.CategoryLight.Name = "CategoryLight";
             this.CategoryLight.Size = new System.Drawing.Size(78, 13);
             this.CategoryLight.TabIndex = 35;
@@ -878,11 +879,25 @@ namespace CS2MapCompiler
             this.buildDeformables.Text = "Build Deformable Geometry";
             this.buildDeformables.UseVisualStyleBackColor = true;
             // 
+            // rebakesurfacegraph
+            // 
+            this.rebakesurfacegraph.AutoSize = true;
+            this.rebakesurfacegraph.Checked = true;
+            this.rebakesurfacegraph.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.rebakesurfacegraph.Location = new System.Drawing.Point(165, 128);
+            this.rebakesurfacegraph.Name = "rebakesurfacegraph";
+            this.rebakesurfacegraph.Size = new System.Drawing.Size(136, 17);
+            this.rebakesurfacegraph.TabIndex = 71;
+            this.rebakesurfacegraph.Tag = "labelRebakeSurfaceGraph";
+            this.rebakesurfacegraph.Text = "Rebake Surface Graph";
+            this.rebakesurfacegraph.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(539, 689);
+            this.Controls.Add(this.rebakesurfacegraph);
             this.Controls.Add(this.buildDeformables);
             this.Controls.Add(this.dangerMode);
             this.Controls.Add(this.statusLabel);
@@ -1031,6 +1046,7 @@ namespace CS2MapCompiler
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.CheckBox dangerMode;
         private System.Windows.Forms.CheckBox buildDeformables;
+        private System.Windows.Forms.CheckBox rebakesurfacegraph;
     }
 }
 

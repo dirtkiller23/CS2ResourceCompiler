@@ -216,10 +216,37 @@ namespace CS2MapCompiler
             if (!builddynamicsurfaceeffects.Checked)
             {
                 args.Add("-skipauxfiles");
+                rebakesurfacegraph.Checked = false;
+                rebakesurfacegraph.Enabled = false;
+                if (rebakesurfacegraph.Checked)
+                {
+                    rebakesurfacegraph.Checked = false;
+                    rebakesurfacegraph.Enabled = false;
+                }
+            }
+            else if (builddynamicsurfaceeffects.Checked)
+            {
+                if (rebakesurfacegraph.Enabled == false)
+                {
+                    rebakesurfacegraph.Enabled = true;
+                    rebakesurfacegraph.Checked = true;
+                }
             }
             if (buildDeformables.Checked)
             {
                 args.Add("-deformables forced");
+            }
+            if (!buildDeformables.Checked)
+            {
+                args.Add("-deformables none");
+            }
+            if (rebakesurfacegraph.Checked)
+            {
+                args.Add("-rebake_surfacegraph");
+            }
+            if (!rebakesurfacegraph.Checked)
+            {
+                args.Remove("-rebake_surfacegraph");
             }
             if (entsOnly.Checked)
             {
@@ -539,6 +566,7 @@ namespace CS2MapCompiler
             button3.Click += OnSettingChanged;
             builddynamicsurfaceeffects.CheckedChanged += OnSettingChanged;
             buildDeformables.CheckedChanged += OnSettingChanged;
+            rebakesurfacegraph.CheckedChanged += OnSettingChanged;
             //Baked Lighting
             genLightmaps.CheckedChanged += OnSettingChanged;
             cpu.CheckedChanged += OnSettingChanged;
@@ -698,6 +726,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
             buildDeformables.Checked = false;
+            rebakesurfacegraph.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -744,6 +773,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
             buildDeformables.Checked = false;
+            rebakesurfacegraph.Checked = false;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -780,6 +810,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
             buildDeformables.Checked = false;
+            rebakesurfacegraph.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -826,6 +857,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
             buildDeformables.Checked = false;
+            rebakesurfacegraph.Checked = false;
             //Baked Lighting
             genLightmaps.Checked = false;
             genLightmaps.Enabled = false;
@@ -862,6 +894,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.Checked = false;
             builddynamicsurfaceeffects.Checked = true;
             buildDeformables.Checked = false;
+            rebakesurfacegraph.Checked = false;
             //Baked Lighting
             genLightmaps.Enabled = true;
             genLightmaps.Checked = true;
@@ -945,6 +978,7 @@ namespace CS2MapCompiler
             {"labelentsonly", "Build Entities. Nothing else!"},
             {"labelcustom", "Custom"},
             {"labeldangerMode", "Ignore Schema mismatches."},
+            {"labelRebakeSurfaceGraph", "Rebake All Surface Effects From Scratch (recommended)"},
             //{"labelcompilestatus", "Compilation status."},
         };
 
@@ -973,6 +1007,7 @@ namespace CS2MapCompiler
             onlyBaseTileMesh.MouseHover += Control_MouseEnter;
             builddynamicsurfaceeffects.MouseHover += Control_MouseEnter;
             buildDeformables.MouseHover += Control_MouseEnter;
+            rebakesurfacegraph.MouseHover += Control_MouseEnter;
             //Baked Lighting
             genLightmaps.MouseHover += Control_MouseEnter;         
             cpu.MouseHover += Control_MouseEnter;
